@@ -1,0 +1,35 @@
+---
+title: "Career Village - Matching Users with Professionals"
+subtitle: "Data Survey and Preprocessing"
+output: html_notebook
+---
+<h3> Notebook Summary </h3>
+This notebook is our initial look at the data to identify what we have to work with, what issues exist with the data in its current form, and how the data can best be aggregated for this project. After reading in the data, we follow the outline below:
+- Observe table structures, data types, and summary statistics, and identify key columns
+- Identify and address errors, missing values, and variable transformations
+
+_____________________________________________
+
+<h3>1. Read in the Data </h3>
+```{r}
+# Locate and list files in the directory
+setwd('G:/My Drive/Career-Village/')
+file_list <- list.files(getwd(), full.names=T, pattern='*.csv')
+filenames <- tools::file_path_sans_ext(basename(file_list))
+
+# Read in all csv files into data frames
+for (i in 1:length(file_list)) {
+  df <- read.csv(file_list[i], header=T, na.strings=c('NA',''))
+  assign(filenames[i], df)
+}
+```
+
+<h3> 2a. Variable summaries </h3>
+```{r}
+for (i in 1:length(filenames)) {
+  cat(filenames[i], "\n", "\n")
+  print(summary(get(as.name(filenames[i]))))
+  cat('_______________________________________________________________________________________', "\n")
+}
+```
+
