@@ -1,6 +1,6 @@
 ---
 title: "Career Village - Matching Users with Professionals"
-subtitle: "Data Survey and Preprocessing"
+subtitle: Data Survey and Preprocessing
 output: html_notebook
 ---
 <h3> Notebook Summary </h3>
@@ -10,10 +10,9 @@ This notebook is our initial look at the data to identify what we have to work w
 
 _____________________________________________
 
-<h3>1. Read in the Data </h3>
+<h3> 1. Read in the Data </h3>
 ```{r}
 # Locate and list files in the directory
-setwd('G:/My Drive/Career-Village/')
 file_list <- list.files(getwd(), full.names=T, pattern='*.csv')
 filenames <- tools::file_path_sans_ext(basename(file_list))
 
