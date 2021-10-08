@@ -1,7 +1,9 @@
 ---
 title: "Career Village - Matching Users with Professionals"
 subtitle: Data Survey and Preprocessing
-output: html_notebook
+output:
+  github_document: default
+  html_notebook: default
 ---
 <h3> Notebook Summary </h3>
 This notebook is our initial look at the data to identify what we have to work with, what issues exist with the data in its current form, and how the data can best be aggregated for this project. After reading in the data, we follow the outline below:

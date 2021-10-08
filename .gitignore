@@ -8,6 +8,9 @@
 # Original Data files
 *.csv
 
+# HTML is not pretty on GitHub
+*.html
+
 # User-specific files
 .Ruserdata
 
