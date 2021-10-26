@@ -34,27 +34,33 @@ divisions = tibble(division = c("New England", "Mid-Atlantic", "East North Centr
                                   "West South Central", "Mountain", "Pacific"),
                   states = I(list(div1,div2,div3,div4,div5,div6,div7,div8,div9))) # I() function is required to insert each list as a singular object, i.e. "as Is"
 
+# Drop NA records from professionals
+professionals <- na.omit(professionals)
 
-professionals %>% 
-  mutate_at(professionals_location, pros_loc_div = case_when(
-    . %in% divisions$states[1] ~ divisions$division[1]
-    . %in% divisions$states[2] ~ divisions$division[2]
-    . %in% divisions$states[3] ~ divisions$division[3]
-    . %in% divisions$states[4] ~ divisions$division[4]
-    . %in% divisions$states[5] ~ divisions$division[5]
-    . %in% divisions$states[6] ~ divisions$division[6]
-    . %in% divisions$states[7] ~ divisions$division[7]
-    . %in% divisions$states[8] ~ divisions$division[8]
-    . %in% divisions$states[9] ~ divisions$division[9]
-    )
-  )
-
-
+# Encode the new variable
 professionals %>% 
   mutate(pros_loc_div = case_when(
-    contains(divisions$states[i], 'subset:professionals_location', ignore.case = TRUE) ~ divisions$division[i]
-  ))
-
+           sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[1] ~ divisions$division[1]
+           ,sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[2] ~ divisions$division[2]
+           ,sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[3] ~ divisions$division[3]
+           ,sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[4] ~ divisions$division[4]
+           ,sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[5] ~ divisions$division[5]
+           ,sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[6] ~ divisions$division[6]
+           ,sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[7] ~ divisions$division[7]
+           ,sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[8] ~ divisions$division[8]
+           ,sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[9] ~ divisions$division[9]
+           )
+         )
+head(professionals, 10)
+test <- data.frame("Location" = seq(1,22904))
+sub(".*, ", "", x=professionals$professionals_location[3])
+test
+test$Location[i] <- sub(".*, ", "", x=professionals$professionals_location[i])
+for (i in 1:dim(professionals)[1]) {
+  test$Location[i] <- sub(".*, ", "", x=professionals$professionals_location[i])
+}
+head(test, 20)
+sub(".*, ", "", x=professionals$professionals_location[23])
 
 # Search each entry in the state column for expr
 library(rlist)

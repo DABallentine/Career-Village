@@ -33,6 +33,15 @@ for (i in 1:length(filenames)) {
   cat('_______________________________________________________________________________________', "\n")
 }
 ```
+<h3> 2b. Count of NA values </h3>
+```{r}
+for (i in 1:length(filenames)) {
+  cat(filenames[i], "\n", "\n")
+  print(sapply(get(as.name(filenames[i])), function(x) sum(is.na(x))))
+  cat('_______________________________________________________________________________________', "\n")
+}
+```
+<h3> 2c. Variable structures </h3>
 ```{r}
 for (i in 1:length(filenames)) {
   cat(filenames[i], "\n", "\n")
@@ -40,6 +49,7 @@ for (i in 1:length(filenames)) {
   cat('_______________________________________________________________________________________', "\n")
 }
 ```
+<h3> 2d. Heads of each table </h3>
 ```{r}
 for (i in 1:length(filenames)) {
   cat(filenames[i], "\n", "\n")
