@@ -14,7 +14,8 @@
 # compute the most closely-related characteristic variables before moving further
 # into variables that are associated more with the users' behavior and actions
 
-library(tidyverse)
+library(dplyr)
+library(tibble)
 
 # U.S. Census Bureau Regions and Divisions
 div1 <- c('Connecticut', 'Maine', 'Massachusetts', 'New Hampshire', 'Rhode Island', 'Vermont')
@@ -28,46 +29,28 @@ div7 <- c('Arkansas', 'Louisiana', 'Oklahoma', 'Texas')
 div8 <- c('Arizona', 'Colorado', 'Idaho', 'Montana', 'Nevada', 'New Mexico', 'Utah', 'Wyoming')
 div9 <- c('Alaska', 'California', 'Hawaii', 'Oregon', 'Washington')
 
-# Combine the divisions' lists of member states into a tibble with each labeled by division name
+# Create a tibble of division names
 divisions = tibble(division = c("New England", "Mid-Atlantic", "East North Central", 
                                   "West North Central", "South Atlantic", "East South Central",
-                                  "West South Central", "Mountain", "Pacific"),
-                  states = I(list(div1,div2,div3,div4,div5,div6,div7,div8,div9))) # I() function is required to insert each list as a singular object, i.e. "as Is"
-
+                                  "West South Central", "Mountain", "Pacific"))
+divisions[1,]
 # Drop NA records from professionals
 professionals <- na.omit(professionals)
 
 # Encode the new variable
-professionals %>% 
+professionals <- professionals %>% 
   mutate(pros_loc_div = case_when(
-           sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[1] ~ divisions$division[1]
-           ,sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[2] ~ divisions$division[2]
-           ,sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[3] ~ divisions$division[3]
-           ,sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[4] ~ divisions$division[4]
-           ,sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[5] ~ divisions$division[5]
-           ,sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[6] ~ divisions$division[6]
-           ,sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[7] ~ divisions$division[7]
-           ,sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[8] ~ divisions$division[8]
-           ,sub(pattern = ".*, ", replacement = "", x = professionals_location[i]) %in% divisions$states[9] ~ divisions$division[9]
-           )
+           sub(pattern = ".*, ", replacement = "", x = professionals_location) %in% div1 ~ divisions$division[1]
+           ,sub(pattern = ".*, ", replacement = "", x = professionals_location) %in% div2 ~ divisions$division[2]
+           ,sub(pattern = ".*, ", replacement = "", x = professionals_location) %in% div3 ~ divisions$division[3]
+           ,sub(pattern = ".*, ", replacement = "", x = professionals_location) %in% div4 ~ divisions$division[4]
+           ,sub(pattern = ".*, ", replacement = "", x = professionals_location) %in% div5 ~ divisions$division[5]
+           ,sub(pattern = ".*, ", replacement = "", x = professionals_location) %in% div6 ~ divisions$division[6]
+           ,sub(pattern = ".*, ", replacement = "", x = professionals_location) %in% div7 ~ divisions$division[7]
+           ,sub(pattern = ".*, ", replacement = "", x = professionals_location) %in% div8 ~ divisions$division[8]
+           ,sub(pattern = ".*, ", replacement = "", x = professionals_location) %in% div9 ~ divisions$division[9]
+           ,TRUE ~ 'International'
+            )
          )
-head(professionals, 10)
-test <- data.frame("Location" = seq(1,22904))
-sub(".*, ", "", x=professionals$professionals_location[3])
-test
-test$Location[i] <- sub(".*, ", "", x=professionals$professionals_location[i])
-for (i in 1:dim(professionals)[1]) {
-  test$Location[i] <- sub(".*, ", "", x=professionals$professionals_location[i])
-}
-head(test, 20)
-sub(".*, ", "", x=professionals$professionals_location[23])
 
-# Search each entry in the state column for expr
-library(rlist)
-list.search(divisions$states[i], )
-
-
-head(div_names)
-summary(professionals)
-str(professionals)
-head(professionals$professionals_location,20)
+View(professionals)
