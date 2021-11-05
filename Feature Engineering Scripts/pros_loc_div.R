@@ -72,7 +72,7 @@ professionals$professionals_date_joined <- as.Date(professionals$professionals_d
 # Convert new columns to factors
 professionals$professionals_loc_div <- factor(professionals$professionals_loc_div)
 professionals$professionals_country <- factor(professionals$professionals_country)
-str(professionals)
+print(str(professionals))
 
 ### Plots ###
 
@@ -86,11 +86,12 @@ levels=c('India', 'Canada', 'China', 'UK', 'Brazil', 'Ireland', 'Germany')
 top_countries$professionals_country <- factor(top_countries$professionals_country, levels=levels) # order the countries descending
 
 ## Plot
-top_countries %>% 
+plot1 <- top_countries %>% 
   ggplot(mapping=aes(professionals_country, label='Country')) + 
-  geom_histogram(stat='count', aes(fill=professionals_country)) + 
-  labs(title = "professionals' Top 7 Countries of Origin Outside the U.S.",
-       color = "Country",
+  geom_bar(aes(fill=professionals_country)) + 
+  labs(title = "Professionals' Top 7 Countries of Origin Outside the U.S.",
        x = "Country",
        y = "Number of professionals") +
   theme(plot.title = element_text(hjust = 0.5))
+
+print(plot1)

@@ -68,7 +68,7 @@ students$students_date_joined <- as.Date(students$students_date_joined,'%Y-%m-%d
 # Convert new columns to factors
 students$students_loc_div <- factor(students$students_loc_div)
 students$students_country <- factor(students$students_country)
-str(students)
+print(str(students))
 
 ### Plots ###
 
@@ -82,11 +82,12 @@ levels=c('India', 'Canada', 'UK', 'Nigeria', 'Egypt', 'South Africa', 'Pakistan'
 top_countries$students_country <- factor(top_countries$students_country, levels=levels) # order the countries descending
 
 ## Plot
-top_countries %>% 
+plot1 <- top_countries %>% 
   ggplot(mapping=aes(students_country, label='Country')) + 
-  geom_histogram(stat='count', aes(fill=students_country)) + 
+  geom_bar(aes(fill=students_country)) + 
   labs(title = "Students' Top 7 Countries of Origin Outside the U.S.",
-       color = "Country",
        x = "Country",
        y = "Number of Students") +
   theme(plot.title = element_text(hjust = 0.5))
+
+print(plot1)

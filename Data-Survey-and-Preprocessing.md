@@ -710,8 +710,9 @@ source("~/GitHub/Career-Village/Feature Engineering Scripts/pros_loc_div.R")
     ##  $ professionals_date_joined: Date, format: "2011-10-05" "2011-10-05" ...
     ##  $ professionals_loc_div    : Factor w/ 11 levels "East North Central",..: 7 7 4 6 7 7 7 7 7 7 ...
     ##  $ professionals_country    : Factor w/ 150 levels "Afghanistan",..: 95 95 143 143 95 95 95 95 95 95 ...
+    ## NULL
 
-    ## Warning: Ignoring unknown parameters: binwidth, bins, pad
+![](Data-Survey-and-Preprocessing_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ### questions
 
@@ -736,8 +737,9 @@ source("~/GitHub/Career-Village/Feature Engineering Scripts/stud_loc_div.R")
     ##  $ students_date_joined: Date, format: "2011-12-16" "2011-12-27" ...
     ##  $ students_loc_div    : Factor w/ 11 levels "East North Central",..: 7 7 7 7 7 7 7 7 7 7 ...
     ##  $ students_country    : Factor w/ 132 levels "Afghanistan",..: 84 84 84 84 84 84 84 84 84 84 ...
+    ## NULL
 
-    ## Warning: Ignoring unknown parameters: binwidth, bins, pad
+![](Data-Survey-and-Preprocessing_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ### tag_questions
 
