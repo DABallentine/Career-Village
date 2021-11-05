@@ -5,14 +5,15 @@ output:
   github_document: default
   html_notebook: default
 ---
-<h3> Notebook Summary </h3>
+## Notebook Summary 
 This notebook is our initial look at the data to identify what we have to work with, what issues exist with the data in its current form, and how the data can best be aggregated for this project. After reading in the data, we follow the outline below:
 - Observe table structures, data types, and summary statistics, and identify key columns
-- Identify and address errors, missing values, and variable transformations
+- Identify and address initial errors, missing values, variable transformations, and feature engineering
+- Aggregate required feature sets
 
 _____________________________________________
 
-<h3> 1. Read in the Data </h3>
+## 1. Read in the Data
 ```{r}
 # Locate and list files in the directory
 file_list <- list.files(getwd(), full.names=T, pattern='*.csv')
@@ -25,7 +26,7 @@ for (i in 1:length(file_list)) {
 }
 ```
 
-<h3> 2a. Variable summaries </h3>
+## 2a. Variable summaries
 ```{r}
 for (i in 1:length(filenames)) {
   cat(filenames[i], "\n", "\n")
@@ -33,7 +34,8 @@ for (i in 1:length(filenames)) {
   cat('_______________________________________________________________________________________', "\n")
 }
 ```
-<h3> 2b. Count of NA values </h3>
+
+## 2b. Count of NA values
 ```{r}
 for (i in 1:length(filenames)) {
   cat(filenames[i], "\n", "\n")
@@ -41,7 +43,12 @@ for (i in 1:length(filenames)) {
   cat('_______________________________________________________________________________________', "\n")
 }
 ```
-<h3> 2c. Variable structures </h3>
+### Initial decisions on missing values.
+With no reasonable way to impute professionals' or students' missing information, we will include the value "Not specified" in order to keep those records and potentially discover trends that relate meaningfully to users who chose not to enter those fields. Since the location field is a combination of city and state or country which we will not use in its current form, we will impute the "Not Specified" value into newly engineered columns for state and US division.
+
+We will simply drop the one tag with no name, and 1 answer with no body. Further actions on missing values will likely become necessary later as certain tables are merged.
+
+## 2c. Variable structures
 ```{r}
 for (i in 1:length(filenames)) {
   cat(filenames[i], "\n", "\n")
@@ -49,7 +56,8 @@ for (i in 1:length(filenames)) {
   cat('_______________________________________________________________________________________', "\n")
 }
 ```
-<h3> 2d. Heads of each table </h3>
+
+### 2d. Heads of each table
 ```{r}
 for (i in 1:length(filenames)) {
   cat(filenames[i], "\n", "\n")
@@ -58,3 +66,89 @@ for (i in 1:length(filenames)) {
 }
 ```
 
+## 3. Missing Values, Transformations, and Feature Engineering
+
+### answers
+```{r}
+
+```
+
+### comments
+```{r}
+
+```
+
+### emails
+```{r}
+
+```
+
+### group_memberships
+```{r}
+
+```
+
+### groups
+```{r}
+
+```
+
+### matches
+```{r}
+
+```
+
+### professionals
+The script sourced below completes the following actions: <br>
+* Creates variable professionals_loc_div by binning professionals location into U.S. Geographic Division <br>
+* Creates variable professionals_country by binning professionals location into country <br>
+* Transforms professionals_date_joined into datetime, and removes hh:mm:ss <br>
+* Imputes "Not Specified" for NA fields <br>
+```{r}
+source("~/GitHub/Career-Village/Feature Engineering Scripts/pros_loc_div.R")
+```
+
+### questions
+```{r}
+
+```
+
+### school_memberships
+```{r}
+
+```
+
+### students
+The script sourced below completes the following actions: <br>
+* Creates variable students_loc_div by binning student location into U.S. Geographic Division <br>
+* Creates variable students_country by binning student location into country <br>
+* Transforms students_date_joined into datetime, and removes hh:mm:ss <br>
+* Imputes "Not Specified" for NA fields <br>
+```{r}
+source("~/GitHub/Career-Village/Feature Engineering Scripts/stud_loc_div.R")
+```
+
+### tag_questions
+```{r}
+
+```
+
+### tag_users
+```{r}
+
+```
+
+### tags
+```{r}
+
+```
+
+### question_scores
+```{r}
+
+```
+
+### answer_scores
+```{r}
+
+```

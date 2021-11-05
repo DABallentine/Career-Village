@@ -6,6 +6,8 @@
 
 library(dplyr)
 library(tibble)
+library(tidyr)
+library(stringr)
 
 # U.S. Census Bureau Regions and Divisions
 div1 <- c('Connecticut', 'Maine', 'Massachusetts', 'New Hampshire', 'Rhode Island', 'Vermont')
@@ -24,15 +26,12 @@ divisions = tibble(division = c("New England", "Mid-Atlantic", "East North Centr
                                   "West North Central", "South Atlantic", "East South Central",
                                   "West South Central", "Mountain", "Pacific"))
 
-# Drop NA records from professionals
-print(sapply(professionals, function(x) sum(is.na(x)))) # counts of missing values by column
-dim(professionals)[1] # 28152
-professionals <- na.omit(professionals) # drops 5248 records (18.6%)
-dim(professionals)[1] # 22904
+# Replace all NA values with "Not Specified"
+professionals <- professionals %>% replace(is.na(.), "Not Specified")
 
 # Encode the new variable
 professionals <- professionals %>% 
-  mutate(pros_loc_div = case_when(
+  mutate(professionals_loc_div = case_when(
            sub(pattern = ".*, ", replacement = "", x = professionals_location) %in% div1 ~ divisions$division[1]
            ,sub(pattern = ".*, ", replacement = "", x = professionals_location) %in% div2 ~ divisions$division[2]
            ,sub(pattern = ".*, ", replacement = "", x = professionals_location) %in% div3 ~ divisions$division[3]
@@ -42,8 +41,56 @@ professionals <- professionals %>%
            ,sub(pattern = ".*, ", replacement = "", x = professionals_location) %in% div7 ~ divisions$division[7]
            ,sub(pattern = ".*, ", replacement = "", x = professionals_location) %in% div8 ~ divisions$division[8]
            ,sub(pattern = ".*, ", replacement = "", x = professionals_location) %in% div9 ~ divisions$division[9]
+           ,professionals_location == "Not Specified" ~ "Not Specified"
+           ,str_sub(professionals_location, start=-13) == 'United States' ~ 'Not Specified'
            ,TRUE ~ 'International'
             )
          )
 
-View(professionals)
+# install.packages('countrycode') ## to account for misspellings and non-countries in location field, which will return 'NA'
+
+# # Run this code block for an example of the countryname() function
+# test = c("Deutschland", "China", "Mexica", "SOMEWHERE EXPENSIVE")
+# for (i in 1:length(test)) {
+#   print(countryname(test[i], warn = FALSE))
+# }
+# # output = Germany, China, Mexico, NA
+
+
+# Encode a new variable for country
+library(countrycode)
+professionals <- professionals %>%
+  mutate(professionals_country = case_when(
+    professionals_loc_div == 'International' ~ countryname(word(professionals_location, -1, sep=", "), warn=FALSE)
+    ,professionals_loc_div == 'Not Specified' ~ 'Not Specified'
+    ,TRUE ~ 'United States')
+  )
+
+# Convert date_joined to datetime
+professionals$professionals_date_joined <- as.Date(professionals$professionals_date_joined,'%Y-%m-%d')
+
+# Convert new columns to factors
+professionals$professionals_loc_div <- factor(professionals$professionals_loc_div)
+professionals$professionals_country <- factor(professionals$professionals_country)
+str(professionals)
+
+### Plots ###
+
+# Now observe professionals' locations for other countries
+library(ggplot2)
+library(forcats)
+top_countries <- slice_min(.data=professionals[professionals$professionals_loc_div=='International',], 
+                           order_by = fct_infreq(professionals_country), 
+                           n=2193) # Select the top 2193 professionals as ordered by countries with largest # of professionals
+levels=c('India', 'Canada', 'China', 'UK', 'Brazil', 'Ireland', 'Germany')
+top_countries$professionals_country <- factor(top_countries$professionals_country, levels=levels) # order the countries descending
+
+## Plot
+top_countries %>% 
+  ggplot(mapping=aes(professionals_country, label='Country')) + 
+  geom_histogram(stat='count', aes(fill=professionals_country)) + 
+  labs(title = "professionals' Top 7 Countries of Origin Outside the U.S.",
+       color = "Country",
+       x = "Country",
+       y = "Number of professionals") +
+  theme(plot.title = element_text(hjust = 0.5))

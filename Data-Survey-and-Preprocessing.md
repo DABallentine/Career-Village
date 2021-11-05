@@ -1,23 +1,19 @@
 Career Village - Matching Users with Professionals
 ================
 
-<h3>
-Notebook Summary
-</h3>
+## Notebook Summary
 
 This notebook is our initial look at the data to identify what we have
 to work with, what issues exist with the data in its current form, and
 how the data can best be aggregated for this project. After reading in
 the data, we follow the outline below: - Observe table structures, data
 types, and summary statistics, and identify key columns - Identify and
-address errors, missing values, and variable transformations
+address initial errors, missing values, variable transformations, and
+feature engineering - Aggregate required feature sets
 
 ------------------------------------------------------------------------
 
-<h3>
-
-1.  Read in the Data
-    </h3>
+## 1. Read in the Data
 
 ``` r
 # Locate and list files in the directory
@@ -31,9 +27,7 @@ for (i in 1:length(file_list)) {
 }
 ```
 
-<h3>
-2a. Variable summaries
-</h3>
+## 2a. Variable summaries
 
 ``` r
 for (i in 1:length(filenames)) {
@@ -196,6 +190,120 @@ for (i in 1:length(filenames)) {
     ##  Max.   :39276                     
     ## _______________________________________________________________________________________
 
+## 2b. Count of NA values
+
+``` r
+for (i in 1:length(filenames)) {
+  cat(filenames[i], "\n", "\n")
+  print(sapply(get(as.name(filenames[i])), function(x) sum(is.na(x))))
+  cat('_______________________________________________________________________________________', "\n")
+}
+```
+
+    ## answer_scores 
+    ##  
+    ##    id score 
+    ##     0     0 
+    ## _______________________________________________________________________________________ 
+    ## answers 
+    ##  
+    ##          answers_id   answers_author_id answers_question_id  answers_date_added 
+    ##                   0                   0                   0                   0 
+    ##        answers_body 
+    ##                   1 
+    ## _______________________________________________________________________________________ 
+    ## comments 
+    ##  
+    ##                comments_id         comments_author_id 
+    ##                          0                          0 
+    ## comments_parent_content_id        comments_date_added 
+    ##                          0                          0 
+    ##              comments_body 
+    ##                          4 
+    ## _______________________________________________________________________________________ 
+    ## emails 
+    ##  
+    ##              emails_id    emails_recipient_id       emails_date_sent 
+    ##                      0                      0                      0 
+    ## emails_frequency_level 
+    ##                      0 
+    ## _______________________________________________________________________________________ 
+    ## group_memberships 
+    ##  
+    ## group_memberships_group_id  group_memberships_user_id 
+    ##                          0                          0 
+    ## _______________________________________________________________________________________ 
+    ## groups 
+    ##  
+    ##         groups_id groups_group_type 
+    ##                 0                 0 
+    ## _______________________________________________________________________________________ 
+    ## matches 
+    ##  
+    ##    matches_email_id matches_question_id 
+    ##                   0                   0 
+    ## _______________________________________________________________________________________ 
+    ## professionals 
+    ##  
+    ##          professionals_id    professionals_location    professionals_industry 
+    ##                         0                      3098                      2576 
+    ##    professionals_headline professionals_date_joined 
+    ##                      2067                         0 
+    ## _______________________________________________________________________________________ 
+    ## question_scores 
+    ##  
+    ##    id score 
+    ##     0     0 
+    ## _______________________________________________________________________________________ 
+    ## questions 
+    ##  
+    ##         questions_id  questions_author_id questions_date_added 
+    ##                    0                    0                    0 
+    ##      questions_title       questions_body 
+    ##                    0                    0 
+    ## _______________________________________________________________________________________ 
+    ## school_memberships 
+    ##  
+    ## school_memberships_school_id   school_memberships_user_id 
+    ##                            0                            0 
+    ## _______________________________________________________________________________________ 
+    ## students 
+    ##  
+    ##          students_id    students_location students_date_joined 
+    ##                    0                 2033                    0 
+    ## _______________________________________________________________________________________ 
+    ## tag_questions 
+    ##  
+    ##      tag_questions_tag_id tag_questions_question_id 
+    ##                         0                         0 
+    ## _______________________________________________________________________________________ 
+    ## tag_users 
+    ##  
+    ##  tag_users_tag_id tag_users_user_id 
+    ##                 0                 0 
+    ## _______________________________________________________________________________________ 
+    ## tags 
+    ##  
+    ##   tags_tag_id tags_tag_name 
+    ##             0             1 
+    ## _______________________________________________________________________________________
+
+### Initial decisions on missing values.
+
+With no reasonable way to impute professionals’ or students’ missing
+information, we will include the value “Not specified” in order to keep
+those records and potentially discover trends that relate meaningfully
+to users who chose not to enter those fields. Since the location field
+is a combination of city and state or country which we will not use in
+its current form, we will impute the “Not Specified” value into newly
+engineered columns for state and US division.
+
+We will simply drop the one tag with no name, and 1 answer with no body.
+Further actions on missing values will likely become necessary later as
+certain tables are merged.
+
+## 2c. Variable structures
+
 ``` r
 for (i in 1:length(filenames)) {
   cat(filenames[i], "\n", "\n")
@@ -324,6 +432,8 @@ for (i in 1:length(filenames)) {
     ##  $ tags_tag_name: chr  "college" "computer-science" "computer-software" "business" ...
     ## NULL
     ## _______________________________________________________________________________________
+
+### 2d. Heads of each table
 
 ``` r
 for (i in 1:length(filenames)) {
@@ -553,3 +663,88 @@ for (i in 1:length(filenames)) {
     ## 5       18217            doctor
     ## 6          54       engineering
     ## _______________________________________________________________________________________
+
+## 3. Missing Values, Transformations, and Feature Engineering
+
+### answers
+
+### comments
+
+### emails
+
+### group_memberships
+
+### groups
+
+### matches
+
+### professionals
+
+The script sourced below completes the following actions: <br> \*
+Creates variable professionals_loc_div by binning professionals location
+into U.S. Geographic Division <br> \* Creates variable
+professionals_country by binning professionals location into country
+<br> \* Transforms professionals_date_joined into datetime, and removes
+hh:mm:ss <br> \* Imputes “Not Specified” for NA fields <br>
+
+``` r
+source("~/GitHub/Career-Village/Feature Engineering Scripts/pros_loc_div.R")
+```
+
+    ## 
+    ## Attaching package: 'dplyr'
+
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
+
+    ## 'data.frame':    28152 obs. of  7 variables:
+    ##  $ professionals_id         : chr  "9ced4ce7519049c0944147afb75a8ce3" "f718dcf6d2ec4cb0a52a9db59d7f9e67" "0c673e046d824ec0ad0ebe012a0673e4" "977428d851b24183b223be0eb8619a8c" ...
+    ##  $ professionals_location   : chr  "Not Specified" "Not Specified" "New York, New York" "Boston, Massachusetts" ...
+    ##  $ professionals_industry   : chr  "Not Specified" "Not Specified" "Not Specified" "Not Specified" ...
+    ##  $ professionals_headline   : chr  "Not Specified" "Not Specified" "Not Specified" "Not Specified" ...
+    ##  $ professionals_date_joined: Date, format: "2011-10-05" "2011-10-05" ...
+    ##  $ professionals_loc_div    : Factor w/ 11 levels "East North Central",..: 7 7 4 6 7 7 7 7 7 7 ...
+    ##  $ professionals_country    : Factor w/ 150 levels "Afghanistan",..: 95 95 143 143 95 95 95 95 95 95 ...
+
+    ## Warning: Ignoring unknown parameters: binwidth, bins, pad
+
+### questions
+
+### school_memberships
+
+### students
+
+The script sourced below completes the following actions: <br> \*
+Creates variable students_loc_div by binning student location into U.S.
+Geographic Division <br> \* Creates variable students_country by binning
+student location into country <br> \* Transforms students_date_joined
+into datetime, and removes hh:mm:ss <br> \* Imputes “Not Specified” for
+NA fields <br>
+
+``` r
+source("~/GitHub/Career-Village/Feature Engineering Scripts/stud_loc_div.R")
+```
+
+    ## 'data.frame':    30971 obs. of  5 variables:
+    ##  $ students_id         : chr  "12a89e96755a4dba83ff03e03043d9c0" "e37a5990fe354c60be5e87376b08d5e3" "12b402cceeda43dcb6e12ef9f2d221ea" "a0f431fc79794edcb104f68ce55ab897" ...
+    ##  $ students_location   : chr  NA NA NA NA ...
+    ##  $ students_date_joined: Date, format: "2011-12-16" "2011-12-27" ...
+    ##  $ students_loc_div    : Factor w/ 11 levels "East North Central",..: 7 7 7 7 7 7 7 7 7 7 ...
+    ##  $ students_country    : Factor w/ 132 levels "Afghanistan",..: 84 84 84 84 84 84 84 84 84 84 ...
+
+    ## Warning: Ignoring unknown parameters: binwidth, bins, pad
+
+### tag_questions
+
+### tag_users
+
+### tags
+
+### question_scores
+
+### answer_scores
