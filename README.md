@@ -23,8 +23,42 @@ CareerVillage.org is a nonprofit that crowdsources career advice for underserved
 Data was retrieved from the <a href="https://www.kaggle.com/c/data-science-for-good-careervillage/overview"> Kaggle competition page </a> 
 on 16 September, 2021. Five years worth of data was provided by CareerVillage.org.
 
-<h2> Date Preprocessing </h2>
+<h2> Data Preprocessing </h2>
+<h3> Initial preprocessing by entity </h3>
+We began preprocessing each table individually, to include data type conversions, formatting changes, transformations, and new feature engineering. A summary of the major steps performed for each table is provided below:
+<ol>
+<li> answers </li>
+<li> comments </li>
+<li> emails </li>
+<li> group_memberships </li>
+<li> groups </li>
+<li> matches </li>
+<li> professionals </li>
+* Created variable professionals_loc_div by binning professionals location into U.S. Geographic Division <br>
+* Created variable professionals_country by binning professionals location into country <br>
+* Transformed professionals_date_joined into datetime, and removes hh:mm:ss <br>
+* Imputed "Not Specified" for NA fields <br>
+<li> questions </li>
+<li> school_memberships </li>
+<li> students </li>
+* Created variable students_loc_div by binning students location into U.S. Geographic Division <br>
+* Created variable students_country by binning students location into country <br>
+* Transformed students_date_joined into datetime, and removes hh:mm:ss <br>
+* Imputed "Not Specified" for NA fields <br>
+<li> tag_questions </li>
+<li> tag_users </li>
+<li> tags </li>
+<li> question_scores </li>
+<li> answer_scores </li>
+</ol>
+
+<h3> Subsequent preprocessing by data subset </h3>
+
 <h2> Data Understanding and Exploration </h2>
+<h3> 1. Exploring User Profiles </h3>
+<h4> Locations </h4> 
+More than 90% of each population are from the United States, and the plots below show the top 7 other countries of origin for both professionals and students. 
+
 <h2> Data Preparation for Modeling </h2>
 <h2> Modeling </h2>
 <h2> Evaluation </h2>
