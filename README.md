@@ -9,9 +9,9 @@ Taylor Ferguson <br>
 Matt Flynn <br>
 Dustin Ballentine <br>
 
-<h2> Project Summary </h2>
+## Project Summary
 CareerVillage.org is a nonprofit that crowdsources career advice for underserved youth. Founded in 2011 in four classrooms in New York City, the platform has now served career advice from 25,000 volunteer professionals to over 3.5M online learners. The platform uses a Q&A style similar to StackOverflow or Quora to provide students with answers to any question about any career. 
-<h2> Research Objectives </h2>
+## Research Objectives
 <ol>
   <li> Explore User Profiles </li>
   <li> Explore Activities Time Series </li>
@@ -19,12 +19,14 @@ CareerVillage.org is a nonprofit that crowdsources career advice for underserved
   <li> What factors motivate user participation? </li>
   <li> What factors affect a question’s likelihood to be answered? </li>
 </ol>
-<h2> Data Resources </h2>
-Data was retrieved from the <a href="https://www.kaggle.com/c/data-science-for-good-careervillage/overview"> Kaggle competition page </a> 
-on 16 September, 2021. Five years worth of data was provided by CareerVillage.org.
 
-<h2> Data Preprocessing </h2>
-<h3> Initial preprocessing by entity </h3>
+## Data Resources
+Data was retrieved from the <a href="https://www.kaggle.com/c/data-science-for-good-careervillage/overview"> Kaggle competition page </a> 
+on 16 September, 2021. Five years worth of data was provided by CareerVillage.org. The data consists of 15 csv files, 1 file per entity. The Enhanced Entity Relationship Diagram below approximates the relationships amongst the original 15 tables.
+![image](https://user-images.githubusercontent.com/78170609/140662835-169f9641-38e1-4190-98fe-d08187b97532.png)
+
+## Data Preprocessing
+### Initial preprocessing by entity
 We began preprocessing each table individually, to include data type conversions, formatting changes, transformations, and new feature engineering. A summary of the major steps performed for each table is provided below:
 <ol>
 <li> answers </li>
@@ -52,19 +54,21 @@ We began preprocessing each table individually, to include data type conversions
 <li> answer_scores </li>
 </ol>
 
-<h3> Subsequent preprocessing by data subset </h3>
+### Subsequent preprocessing by data subset
 
-<h2> Data Understanding and Exploration </h2>
-<h3> 1. Exploring User Profiles </h3>
-<h4> Locations </h4> 
-More than 90% of each population are from the United States, and the plots below show the top 7 other countries of origin for both professionals and students. 
+## Data Understanding and Exploration
+### 1. Exploring User Profiles
+#### Locations 
+More than 90% of each population are from the United States, and the plots below show the top 7 other countries of origin for both professionals and students. <br>
+![image](https://user-images.githubusercontent.com/78170609/140662498-906c6cd0-ca7d-4e3d-b664-831e290474ec.png) <br>
+![image](https://user-images.githubusercontent.com/78170609/140662517-aecfa497-bc59-4822-bd19-5ae9b589f66c.png) <br>
 
-<h2> Data Preparation for Modeling </h2>
-<h2> Modeling </h2>
-<h2> Evaluation </h2>
-<h2> Results </h2>
-<h2> Future Work </h2>
-<h3> Possible future work may include:</h3>
+## Data Preparation for Modeling
+## Modeling
+## Evaluation
+## Results
+## Future Work
+### Possible future work may include:
 <ol>
   <li>Future work</li>
 </ol>
