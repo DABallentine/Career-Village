@@ -21,7 +21,7 @@ filenames <- tools::file_path_sans_ext(basename(file_list))
 
 # Read in all csv files into data frames
 for (i in 1:length(file_list)) {
-  df <- read.csv(file_list[i], header=T, na.strings=c('NA',''))
+  df <- read.csv(file_list[i], header=T, na.strings=c('NA',''), encoding="UTF-8") # Using UTF-8 to include extended and non-Latin characters
   assign(filenames[i], df)
 }
 ```
@@ -44,9 +44,9 @@ for (i in 1:length(filenames)) {
 }
 ```
 ### Initial decisions on missing values.
-With no reasonable way to impute professionals' or students' missing information, we will include the value "Not specified" in order to keep those records and potentially discover trends that relate meaningfully to users who chose not to enter those fields. Since the location field is a combination of city and state or country which we will not use in its current form, we will impute the "Not Specified" value into newly engineered columns for state and US division.
+With no reasonable way to impute professionals' or students' missing information, we will include the value "Not specified" in order to keep those records and potentially discover trends that relate meaningfully to users who chose not to enter those fields. Since the location field is a combination of city and state or country which we will not use in its current form, we will impute the "Not Specified" value into newly engineered columns for US division.
 
-We will simply drop the one tag with no name, and 1 answer with no body. Further actions on missing values will likely become necessary later as certain tables are merged.
+We will simply drop the one tag with no name, and 1 answer with no body. Further actions on missing values will be addressed as they arise later when certain tables are merged.
 
 ## 2c. Variable structures
 ```{r}

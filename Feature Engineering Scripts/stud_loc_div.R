@@ -15,7 +15,7 @@ div2 <- c('New Jersey', 'New York', 'Pennsylvania')
 div3 <- c('Illinois', 'Indiana','Michigan', 'Ohio', 'Wisconsin')
 div4 <- c('Iowa', 'Kansas', 'Minnesota', 'Missouri', 'Nebraska', 'North Dakota', 'South Dakota')
 div5 <- c('Delaware', 'Florida', 'Georgia', 'Maryland', 'North Carolina', 'South Carolina', 
-          'Virginia', 'Washington, D.C.', 'West Virginia')
+          'Virginia', 'D.C.', 'West Virginia')
 div6 <- c('Alabama', 'Kentucky', 'Mississippi', 'Tennessee')
 div7 <- c('Arkansas', 'Louisiana', 'Oklahoma', 'Texas')
 div8 <- c('Arizona', 'Colorado', 'Idaho', 'Montana', 'Nevada', 'New Mexico', 'Utah', 'Wyoming')
@@ -25,6 +25,73 @@ div9 <- c('Alaska', 'California', 'Hawaii', 'Oregon', 'Washington')
 divisions = tibble(division = c("New England", "Mid-Atlantic", "East North Central", 
                                 "West North Central", "South Atlantic", "East South Central",
                                 "West South Central", "Mountain", "Pacific"))
+
+
+students <- read.csv('students.csv', na.strings=c('NA',''), encoding="UTF-8") #<<<<DELETE THIS######
+
+# Starting count: 5,481 unique locations
+length(unique(students$students_location))
+
+# Replace all NA values with "Not Specified"
+students <- students %>% replace(is.na(.), "Not Specified")
+
+# Remove generalizing terms, e.g. "Greater Chicago Area" becomes simply "Chicago"
+students$students_location <- str_replace_all(students$students_location, "Greater ", "")
+students$students_location <- str_replace_all(students$students_location, " Area", "")
+students$students_location <- str_replace_all(students$students_location, " area", "")
+students$students_location <- str_replace_all(students$students_location, " Region", "")
+
+# Standardize several major cities listed without states, e.g. "Chicago" now becomes "Chicago, Illinois", as well as numerous error categories such as "none"
+students$students_location <- case_when(students$students_location == "Atlanta" ~ "Atlanta, Georgia",
+                                                  students$students_location == "Birmingham" ~ "Birmingham, Alabama",
+                                                  students$students_location == "Boca Raton" ~ "Boca Raton, Florida",
+                                                  students$students_location == "Boston" ~ "Boston, Massachusetts",
+                                                  students$students_location == "Chicago" ~ "Chicago, Illinois",
+                                                  students$students_location == "Chicago; New York" ~ "Chicago, Illinois",
+                                                  students$students_location == "Dallas/Fort Worth" ~ "Dallas/Fort Worth, Texas",
+                                                  students$students_location == "Denver" ~ "Denver, Colorado",
+                                                  students$students_location == "Detroit" ~ "Detroit, Michigan",
+                                                  students$students_location == "Dublin, County Dublin" ~ "Dublin, Ireland",
+                                                  students$students_location == "empty" ~ "Not Specified",
+                                                  students$students_location == "fill in" ~ "Not Specified",
+                                                  students$students_location == "Hawaiian Islands" ~ "Hawaii, Hawaii",
+                                                  students$students_location == "Howell" ~ "Howell, New Jersey",
+                                                  students$students_location == "Kennewick" ~ "Kennewick, Washington",
+                                                  students$students_location == "Lancaster" ~ "Lancaster, Pennsylvania",
+                                                  students$students_location == "Lancaster PA" ~ "Lancaster, Pennsylvania",
+                                                  students$students_location == "Lincoln Park" ~ "Lincoln Park, Illinois",
+                                                  students$students_location == "Los Angeles" ~ "Los Angeles, California",
+                                                  students$students_location == "Memphis" ~ "Memphis, Tennessee", 
+                                                  students$students_location == "Miami/Fort Lauderdale" ~ "Miami, Florida",
+                                                  students$students_location == "Milwaukee" ~ "Milwaukee, Wisconsin", 
+                                                  students$students_location == "Minneapolis-St. Paul" ~ "Minneapolis-St. Paul, Minnesota",
+                                                  students$students_location == "na" ~ "Not Specified",
+                                                  students$students_location == "Nashville" ~ "Nashville, Tennessee",
+                                                  students$students_location == "Nashville, TN" ~ "Nashville, Tennessee",
+                                                  students$students_location == "New Orleans" ~ "New Orleans, Louisiana",
+                                                  students$students_location == "New York City" ~ "New York, New York",
+                                                  students$students_location == "Newark" ~ "Newark, New Jersey",
+                                                  students$students_location == "no location provided" ~ "Not Specified",
+                                                  students$students_location == "No location provided" ~ "Not Specified",
+                                                  students$students_location == "none" ~ "Not Specified",
+                                                  students$students_location == "Other" ~ "Not Specified",
+                                                  students$students_location == "Philadelphia" ~ "Philadelphia, Pennsylvania",
+                                                  students$students_location == "Pittsburg" ~ "Pittsburg, Pennsylvania",
+                                                  students$students_location == "Pittsburgh" ~ "Pittsburg, Pennsylvania",                                                  
+                                                  students$students_location == "Salt Lake City" ~ "Salt Lake City, Utah",
+                                                  students$students_location == "San Diego" ~ "San Diego, California",
+                                                  students$students_location == "San Francisco Bay" ~ "San Francisco, California",
+                                                  students$students_location == "Seattle" ~ "Seattle, Washington",
+                                                  students$students_location == "St. Louis" ~ "St. Louis, Missouri",
+                                                  students$students_location == "TEST" ~ "Not Specified",
+                                                  students$students_location == "Washington" ~ "Washington, Washington",
+                                                  students$students_location == "Washington DC Metro" ~ "Washington, D.C.",
+                                                  students$students_location == "Washington D.C. Metro" ~ "Washington, D.C.",
+                                                  TRUE ~ students$students_location
+)
+
+# Ending count: 5,472 unique locations, reduced by 9 duplicates or errors
+length(unique(students$students_location))
 
 # Encode the new variable for student location division
 students <- students %>% 
@@ -40,6 +107,7 @@ students <- students %>%
     ,sub(pattern = ".*, ", replacement = "", x = students_location) %in% div9 ~ divisions$division[9]
     ,is.na(students_location) ~ "Not Specified"
     ,str_sub(students_location, start=-13) == 'United States' ~ 'Not Specified'
+    ,students_location == 'Not Specified' ~ 'Not Specified'
     ,TRUE ~ 'International')
   )
 
@@ -62,6 +130,9 @@ students <- students %>%
   ,TRUE ~ 'United States')
   )
 
+# Replace NA countries with "Not Specified"
+students$students_country[students$students_location == 'Not Specified'] <- 'Not Specified'
+
 # Convert date_joined to datetime
 students$students_date_joined <- as.Date(students$students_date_joined,'%Y-%m-%d')
 
@@ -78,7 +149,7 @@ library(forcats)
 top_countries <- slice_min(.data=students[students$students_loc_div=='International',], 
                            order_by = fct_infreq(students_country), 
                            n=3600) # Select the top 3600 students as ordered by countries with largest # of students
-levels=c('India', 'Canada', 'UK', 'Nigeria', 'Egypt', 'South Africa', 'Pakistan')
+levels=c('India', 'Canada', 'UK', 'Egypt', 'Nigeria', 'South Africa', 'Pakistan')
 top_countries$students_country <- factor(top_countries$students_country, levels=levels) # order the countries descending
 
 ## Plot
@@ -91,3 +162,21 @@ plot1 <- top_countries %>%
   theme(plot.title = element_text(hjust = 0.5))
 
 print(plot1)
+dev.off()
+
+# Observe students' locations within the U.S. and compared to international
+
+## Plot
+plot2 <- students %>% 
+  ggplot(mapping=aes(x=reorder(students_loc_div, students_loc_div, function(x)-length(x)))) + 
+  geom_bar(fill = c("#3182bd", "#c74e4e", "#3182bd", "#3182bd", "#3182bd", "#3182bd", "#595959", "#3182bd", "#3182bd", "#3182bd", "#3182bd"), alpha = 0.7) + 
+  labs(title = "Students' Distribution Within the U.S.",
+       x = "Division",
+       y = "Number of Students") +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45,
+                                   hjust = 1)) +
+  scale_y_continuous(breaks = seq(0,5500,1000),
+                     minor_breaks = seq(0,5500,500))
+
+print(plot2)

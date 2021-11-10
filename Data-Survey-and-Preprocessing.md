@@ -22,7 +22,7 @@ filenames <- tools::file_path_sans_ext(basename(file_list))
 
 # Read in all csv files into data frames
 for (i in 1:length(file_list)) {
-  df <- read.csv(file_list[i], header=T, na.strings=c('NA',''))
+  df <- read.csv(file_list[i], header=T, na.strings=c('NA',''), encoding="UTF-8") # Using UTF-8 to include extended and non-Latin characters
   assign(filenames[i], df)
 }
 ```
@@ -296,11 +296,11 @@ those records and potentially discover trends that relate meaningfully
 to users who chose not to enter those fields. Since the location field
 is a combination of city and state or country which we will not use in
 its current form, we will impute the “Not Specified” value into newly
-engineered columns for state and US division.
+engineered columns for US division.
 
 We will simply drop the one tag with no name, and 1 answer with no body.
-Further actions on missing values will likely become necessary later as
-certain tables are merged.
+Further actions on missing values will be addressed as they arise later
+when certain tables are merged.
 
 ## 2c. Variable structures
 
@@ -709,10 +709,8 @@ source("~/GitHub/Career-Village/Feature Engineering Scripts/pros_loc_div.R")
     ##  $ professionals_headline   : chr  "Not Specified" "Not Specified" "Not Specified" "Not Specified" ...
     ##  $ professionals_date_joined: Date, format: "2011-10-05" "2011-10-05" ...
     ##  $ professionals_loc_div    : Factor w/ 11 levels "East North Central",..: 7 7 4 6 7 7 7 7 7 7 ...
-    ##  $ professionals_country    : Factor w/ 150 levels "Afghanistan",..: 95 95 143 143 95 95 95 95 95 95 ...
+    ##  $ professionals_country    : Factor w/ 149 levels "Afghanistan",..: 94 94 142 142 94 94 94 94 94 94 ...
     ## NULL
-
-![](Data-Survey-and-Preprocessing_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ### questions
 
@@ -733,13 +731,11 @@ source("~/GitHub/Career-Village/Feature Engineering Scripts/stud_loc_div.R")
 
     ## 'data.frame':    30971 obs. of  5 variables:
     ##  $ students_id         : chr  "12a89e96755a4dba83ff03e03043d9c0" "e37a5990fe354c60be5e87376b08d5e3" "12b402cceeda43dcb6e12ef9f2d221ea" "a0f431fc79794edcb104f68ce55ab897" ...
-    ##  $ students_location   : chr  NA NA NA NA ...
+    ##  $ students_location   : chr  "Not Specified" "Not Specified" "Not Specified" "Not Specified" ...
     ##  $ students_date_joined: Date, format: "2011-12-16" "2011-12-27" ...
     ##  $ students_loc_div    : Factor w/ 11 levels "East North Central",..: 7 7 7 7 7 7 7 7 7 7 ...
-    ##  $ students_country    : Factor w/ 132 levels "Afghanistan",..: 84 84 84 84 84 84 84 84 84 84 ...
+    ##  $ students_country    : Factor w/ 133 levels "Afghanistan",..: 85 85 85 85 85 85 85 85 85 85 ...
     ## NULL
-
-![](Data-Survey-and-Preprocessing_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ### tag_questions
 
