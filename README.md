@@ -36,17 +36,17 @@ We began preprocessing each table individually, to include data type conversions
 <li> groups </li>
 <li> matches </li>
 <li> professionals </li>
-* Created variable professionals_loc_div by binning professionals location into U.S. Geographic Division <br>
-* Created variable professionals_country by binning professionals location into country <br>
-* Transformed professionals_date_joined into datetime, and removes hh:mm:ss <br>
-* Imputed "Not Specified" for NA fields <br>
+- Created variable professionals_loc_div by binning professionals location into U.S. Geographic Division <br>
+- Created variable professionals_country by binning professionals location into country <br>
+- Transformed professionals_date_joined into datetime, and removes hh:mm:ss <br>
+- Imputed "Not Specified" for NA fields <br>
 <li> questions </li>
 <li> school_memberships </li>
 <li> students </li>
-* Created variable students_loc_div by binning students location into U.S. Geographic Division <br>
-* Created variable students_country by binning students location into country <br>
-* Transformed students_date_joined into datetime, and removes hh:mm:ss <br>
-* Imputed "Not Specified" for NA fields <br>
+- Created variable students_loc_div by binning students location into U.S. Geographic Division <br>
+- Created variable students_country by binning students location into country <br>
+- Transformed students_date_joined into datetime, and removes hh:mm:ss <br>
+- Imputed "Not Specified" for NA fields <br>
 <li> tag_questions </li>
 <li> tag_users </li>
 <li> tags </li>
@@ -59,7 +59,13 @@ We began preprocessing each table individually, to include data type conversions
 ## Data Understanding and Exploration
 ### 1. Exploring User Profiles
 #### Locations 
-More than 90% of each population are from the United States, and the plots below show the top 7 other countries of origin for both professionals and students. <br>
+##### U.S.-based Users
+More than 90% of each population are from the United States, although  Another significant category of users are those who choose not to enter any location information, or who entered clearly erroneous information, both of which we have rolled into one category of "Not Specified". Since the choice to leave the field blank is up to the user, these records may provide valuebale information regarding user behavior. <br>
+(insert image 3) <br>
+(insert image 4) <br>
+
+##### International Users
+Although the majority of users are based in the United States, the international users as a group make a significant subset of the total population as shown in the graphs above. The plots below break out the top 7 other countries of origin for both professionals and students. (Add note about disparity between professionals and students?). <br>
 ![image](https://user-images.githubusercontent.com/78170609/140662498-906c6cd0-ca7d-4e3d-b664-831e290474ec.png) <br>
 ![image](https://user-images.githubusercontent.com/78170609/140662517-aecfa497-bc59-4822-bd19-5ae9b589f66c.png) <br>
 
