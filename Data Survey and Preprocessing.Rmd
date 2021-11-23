@@ -6,10 +6,10 @@ output:
   html_notebook: default
 ---
 ## Notebook Summary 
-This notebook is our initial look at the data to identify what we have to work with, what issues exist with the data in its current form, and how the data can best be aggregated for this project. After reading in the data, we follow the outline below:
-- Observe table structures, data types, and summary statistics, and identify key columns
-- Identify and address initial errors, missing values, variable transformations, and feature engineering
-- Aggregate required feature sets
+This notebook is our initial look at the data to identify what we have to work with, what issues exist with the data in its current form, and how the data can best be aggregated for this project. After reading in the data, we follow the outline below: <br>
+- Observe table structures, data types, and summary statistics, and identify key columns <br>
+- Identify and address initial errors, missing values, variable transformations, and feature engineering <br>
+- Aggregate required feature sets <br>
 
 _____________________________________________
 
@@ -106,6 +106,7 @@ The script sourced below completes the following actions: <br>
 * Imputes "Not Specified" for NA fields <br>
 ```{r}
 source("~/GitHub/Career-Village/Feature Engineering Scripts/pros_loc_div.R")
+source("~/GitHub/Career-Village/Feature Engineering Scripts/answers_by_industry.R")
 ```
 
 ### questions

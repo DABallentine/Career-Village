@@ -6,10 +6,11 @@ Career Village - Matching Users with Professionals
 This notebook is our initial look at the data to identify what we have
 to work with, what issues exist with the data in its current form, and
 how the data can best be aggregated for this project. After reading in
-the data, we follow the outline below: - Observe table structures, data
-types, and summary statistics, and identify key columns - Identify and
-address initial errors, missing values, variable transformations, and
-feature engineering - Aggregate required feature sets
+the data, we follow the outline below: <br> - Observe table structures,
+data types, and summary statistics, and identify key columns <br> -
+Identify and address initial errors, missing values, variable
+transformations, and feature engineering <br> - Aggregate required
+feature sets <br>
 
 ------------------------------------------------------------------------
 
@@ -711,6 +712,45 @@ source("~/GitHub/Career-Village/Feature Engineering Scripts/pros_loc_div.R")
     ##  $ professionals_loc_div    : Factor w/ 11 levels "East North Central",..: 7 7 4 6 7 7 7 7 7 7 ...
     ##  $ professionals_country    : Factor w/ 149 levels "Afghanistan",..: 94 94 142 142 94 94 94 94 94 94 ...
     ## NULL
+
+``` r
+source("~/GitHub/Career-Village/Feature Engineering Scripts/answers_by_industry.R")
+```
+
+    ## Loading required package: lattice
+
+    ## -- Attaching packages --------------------------------------- tidyverse 1.3.1 --
+
+    ## v readr 2.0.1     v purrr 0.3.4
+
+    ## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
+    ## x dplyr::filter() masks stats::filter()
+    ## x dplyr::lag()    masks stats::lag()
+    ## x purrr::lift()   masks caret::lift()
+
+    ## 
+    ## Attaching package: 'scales'
+
+    ## The following object is masked from 'package:purrr':
+    ## 
+    ##     discard
+
+    ## The following object is masked from 'package:readr':
+    ## 
+    ##     col_factor
+
+    ## Package version: 3.1.0
+    ## Unicode version: 13.0
+    ## ICU version: 69.1
+
+    ## Parallel computing: 8 of 8 threads used.
+
+    ## See https://quanteda.io for tutorials and examples.
+
+    ## Warning: NA is replaced by empty string
+
+    ## Warning in `[<-.factor`(`*tmp*`, thisvar, value = 0): invalid factor level, NA
+    ## generated
 
 ### questions
 

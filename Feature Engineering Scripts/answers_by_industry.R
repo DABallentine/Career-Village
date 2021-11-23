@@ -257,18 +257,18 @@ plot2 <- top30 %>%
 print(plot2)
 
 
-#answers by proportion
-prop_prof_answer_ind <- prop.table(table(df_prof_answer$professionals_industry))
-View(prop_prof_answer_ind)
-
-#proportion of answers per industry
-df_ind_answer_prop <- df_prof_answer_ind$Freq / df_prof_ind$Freq
-View(df_ind_answer_prop)
-str(df_ind_answer_prop)
-
-#Dataframe now include industry, number of answers per industry, and ratio of profs/answers
-df_prof_answer_ind$answer_proportion <- df_ind_answer_prop
-
-str(df_prof_answer_ind)
-View(df_prof_answer_ind)
+# #answers by proportion
+# prop_prof_answer_ind <- prop.table(table(df_prof_answer$professionals_industry))
+# View(prop_prof_answer_ind)
+# 
+# #proportion of answers per industry
+# df_ind_answer_prop <- prof_answer_ind$Freq / df_prof_ind$Freq
+# View(df_ind_answer_prop)
+# str(df_ind_answer_prop)
+# 
+# #Dataframe now include industry, number of answers per industry, and ratio of profs/answers
+# prof_answer_ind$answer_proportion <- df_ind_answer_prop
+# 
+# str(prof_answer_ind)
+# View(prof_answer_ind)
 ############################################################
