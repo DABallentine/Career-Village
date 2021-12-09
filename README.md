@@ -6,7 +6,6 @@ Dave Collins <br>
 Kristie Soliman <br>
 Jaime Cassell <br>
 Taylor Ferguson <br>
-Matt Flynn <br>
 Dustin Ballentine <br>
 
 ## Project Summary
@@ -65,14 +64,31 @@ More than 90% of each population are from the United States, although  Another s
 ![students_Map](https://user-images.githubusercontent.com/93226184/143082899-8fb705a9-8b71-48f6-9cd9-219419454a30.jpeg) <br>
 
 ##### International Users
-Although the majority of users are based in the United States, the international users as a group make a significant subset of the total population as shown in the graphs above. The plots below break out the top 7 other countries of origin for both professionals and students. (Add note about disparity between professionals and students?). <br>
+Although the majority of users are based in the United States, the international users as a group make a significant subset of the total population as shown in the graphs above. The plots below break out the top 7 other countries of origin for both professionals and students. As the charts below highlight, whereas a majority of both international professionals and students come from India, international professionals appear to have a higher presence in China and Europe, while more international students are in Africa. <br> <br>
 ![image](https://user-images.githubusercontent.com/78170609/140662498-906c6cd0-ca7d-4e3d-b664-831e290474ec.png) <br>
 ![image](https://user-images.githubusercontent.com/78170609/140662517-aecfa497-bc59-4822-bd19-5ae9b589f66c.png) <br>
 
-## Data Preparation for Modeling
+#### Industries
+
+![Professionals' Industries](https://user-images.githubusercontent.com/78170609/145463621-749653e2-c129-4e73-9e6c-339c1f4f3f58.png) <br>
+![Industries Providing Answers](https://user-images.githubusercontent.com/78170609/145463669-550c4e1f-c86b-40e9-81f2-bc3cee15d59c.png) <br>
+
+### 2. Exploring Activity Time Series
+
+### 3. Exploring Questions and Answers
+
 ## Modeling
-## Evaluation
-## Results
+
+### 4. What factors motivate users' participation?
+#### Defining participation / activity
+
+#### a. Factors motivating professionals
+
+#### b. Factors motivating students
+
+### 5. What factors affect a question's likelihood to be answered?
+
+## Results Summary
 ## Future Work
 ### Possible future work may include:
 <ol>
