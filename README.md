@@ -77,6 +77,24 @@ Although the majority of users are based in the United States, the international
 
 ### 3. Exploring Questions and Answers
 
+#### Student Questions
+Topic modeling was performed on the questions asked by students to identify recurring themes. Questions were defined by the ten topics below: <br> <br>
+<i> Topic 1: </i> Finding and internship or job <br>
+<i> Topic 2: </i> High-school-aged students inquiring about college and careers <br>
+<i> Topic 3: </i> Finding work in people-oriented occupations (e.g. working with children, customer-service, social work) <br>
+<i> Topic 4: </i> Seeking help coping with college stressors (e.g. lagging grades, time comitments, anxiety, uncertainty) <br>
+<i> Topic 5: </i> Options for paying for college such as applying for sholarships/financial aid <br>
+<i> Topic 6: </i> Careers and outlook for STEM majors <br>
+<i> Topic 7: </i> Careers and outlook for the medical field <br>
+<i> Topic 8: </i> Careers and outlook for business-related majors (e.g accounting, finance, economics) <br> 
+<i> Topic 9: </i> Career and outlook for artistic-related majors (e.g. fashion, culinary-arts, architecture, creative-writing)  <br> <br>
+The top ten terms for each topic are shown below along with the frequency of questions associated with each topic. The topics were further plotted by year to show the fluctuations over time. <br> <br>
+![Question Topics LDA](https://user-images.githubusercontent.com/93226184/145511553-fbbaef82-3e06-49bb-b404-4ca45f5ad71a.png) <br>
+![Question Topics Frequency](https://user-images.githubusercontent.com/93226184/145511577-28dfa632-4da5-4ea6-8227-1b90247fce14.png) <br>
+![Question Topics by Year](https://user-images.githubusercontent.com/93226184/145511605-58eebd90-8b75-4082-887d-91872108bd6e.png) <br>
+
+
+
 ## Modeling
 
 ### 4. What factors motivate users' participation?
