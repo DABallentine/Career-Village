@@ -205,7 +205,7 @@ total_answers <- aggregate.data.frame(df_prof_answer$professionals_id, by = list
 professionals <- merge(professionals, total_answers, by.x="professionals_id", by.y="Group.1", all.x = TRUE)
 names(professionals)[names(professionals) == 'x'] <- 'total_answers'
 
-## Average answer length
+## Average answer length & total words written
 library(quanteda)
 library(quanteda.textstats)
 library(stopwords)
@@ -214,10 +214,13 @@ myCorpus <- corpus(df_prof_answer$answers_body,
 myCorpus_stats <- summary(myCorpus, n = Inf) # The summary contains word, token, and sentence count for each answer
 myCorpus_stats$sent_length <- myCorpus_stats$Types / myCorpus_stats$Sentences # Divide number of words by # sentences to compute average sentence length
 df_prof_answer <- merge(df_prof_answer, myCorpus_stats, by.x="answers_id", by.y="Text", all.x = TRUE) # Add those columns to the merged working data set
+
 # Compute aggregate statistics by professional
 avg_ans_word_count <- aggregate.data.frame(df_prof_answer$Types, by = list(df_prof_answer$professionals_id), FUN = mean)
 avg_ans_num_sents <- aggregate.data.frame(df_prof_answer$Sentences, by = list(df_prof_answer$professionals_id), FUN = mean)
 avg_ans_sent_length <- aggregate.data.frame(df_prof_answer$sent_length, by = list(df_prof_answer$professionals_id), FUN = mean)
+tot_ans_word_count <- aggregate.data.frame(df_prof_answer$Types, by = list(df_prof_answer$professionals_id), FUN = sum)
+
 # Merge the new columns into professionals data frame
 professionals <- merge(professionals, avg_ans_word_count, by.x="professionals_id", by.y="Group.1", all.x = TRUE) 
 names(professionals)[names(professionals) == 'x'] <- 'avg_ans_word_count' # Rename the newly merged column
@@ -225,6 +228,9 @@ professionals <- merge(professionals, avg_ans_num_sents, by.x="professionals_id"
 names(professionals)[names(professionals) == 'x'] <- 'avg_ans_num_sents' # Rename the newly merged column
 professionals <- merge(professionals, avg_ans_sent_length, by.x="professionals_id", by.y="Group.1", all.x = TRUE) 
 names(professionals)[names(professionals) == 'x'] <- 'avg_ans_sent_length' # Rename the newly merged column
+professionals <- merge(professionals, tot_ans_word_count, by.x="professionals_id", by.y="Group.1", all.x = TRUE) 
+names(professionals)[names(professionals) == 'x'] <- 'tot_words_written' # Rename the newly merged column
+
 # Replace NA values with 0
 professionals <- professionals %>% replace(is.na(.), 0)
 

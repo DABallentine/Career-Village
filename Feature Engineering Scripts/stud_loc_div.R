@@ -1,7 +1,7 @@
-# Variable    Computed:   stud_loc_div
-# Variable  Definition:   Location of the student binned into region divisions of the US as listed below
-# Research   Objective:   Explore User Profiles
-# Research    Question:   What clusters exist within students
+# This script transforms and engineers features for the students data frame: 
+
+# - loc_div
+# - country
 
 
 library(dplyr)
@@ -25,9 +25,6 @@ div9 <- c('Alaska', 'California', 'Hawaii', 'Oregon', 'Washington')
 divisions = tibble(division = c("New England", "Mid-Atlantic", "East North Central", 
                                 "West North Central", "South Atlantic", "East South Central",
                                 "West South Central", "Mountain", "Pacific"))
-
-
-students <- read.csv('students.csv', na.strings=c('NA',''), encoding="UTF-8") #<<<<DELETE THIS######
 
 # Starting count: 5,481 unique locations
 length(unique(students$students_location))
@@ -131,7 +128,9 @@ students <- students %>%
   )
 
 # Replace NA countries with "Not Specified"
-students$students_country[students$students_location == 'Not Specified'] <- 'Not Specified'
+students$students_country <- as.character(students$students_country)
+students[is.na(students$students_country),"students_country"] <- "Other"
+students$students_country <- as.factor(students$students_country)
 
 # Convert date_joined to datetime
 students$students_date_joined <- as.Date(students$students_date_joined,'%Y-%m-%d')

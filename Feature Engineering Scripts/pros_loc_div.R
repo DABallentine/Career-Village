@@ -1,8 +1,7 @@
-# Variable    Computed:   pros_loc_div
-# Variable  Definition:   Location of the professional binned into region divisions of the US as listed below
-# Research   Objective:   Explore User Profiles
-# Research    Question:   What clusters exist within professionals
+# This script transforms and engineers features for the professionals data frame: 
 
+# - loc_div
+# - country
 
 library(dplyr)
 library(tibble)
@@ -127,7 +126,9 @@ professionals <- professionals %>%
   )
 
 # Encode the 42 records remaining with NA country (due to incomplete location information) as "Other"
-replace_na(professionals$professionals_country, "Other")
+professionals$professionals_country <- as.character(professionals$professionals_country)
+professionals[is.na(professionals$professionals_country),"professionals_country"] <- "Other"
+professionals$professionals_country <- as.factor(professionals$professionals_country)
            
 # Convert date_joined to datetime
 professionals$professionals_date_joined <- as.Date(professionals$professionals_date_joined,'%Y-%m-%d')

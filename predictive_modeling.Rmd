@@ -1,0 +1,725 @@
+---
+title: "Career Village - Matching Users with Professionals"
+subtitle: 'Predictive Modeling'
+output:
+  github_document: default
+  html_notebook: default
+keep_md: true
+---
+________________________________________________________________________________
+
+
+## Overview
+Using the data output from the notebook subtitled 'Data Survey and Preprocessing', this notebook focuses on two predictive modeling efforts in order to answer research objectives #4 and #5:
+
+**4. What factors influence user participation?** <br>
+**5. What factors influence a question's likelihood of being answered?** <br>
+<br>
+
+```{r include=FALSE}
+# source("~/GitHub/Career-Village/Data Survey and Preprocessing.R")
+# The line above should be used to integrate that notebook's output into the environment for use in this one
+# Alternatively, for development we have saved its key output as csv files and can read them in manually:
+# write.csv(professionals,"~/GitHub/Career-Village/professionals_prepped.csv", row.names = FALSE)
+professionals <- read.csv("~/GitHub/Career-Village/professionals_prepped.csv")
+students <- read.csv("~/GitHub/Career-Village/students_prepped.csv")
+questions <- read.csv("~/GitHub/Career-Village/questions_prepped.csv")
+```
+
+
+## Objective 4. Factors influencing user participation
+This questions is asked an answered separately for professionals and for students, as the populations are inherently different, and the set of potential predictor variables and target variables is different for the two groups. We'll thus approach them sequentially.
+<br>
+
+### For professionals
+From the original data set we computed an additional 15 variables, many of which were used for data exploration, but for the purposes of modeling factors that may influence or indicate a professional's participation, we narrow that to the predictor set below:
+
+**Predictor variables:**
+•	Loc_div: factor with 11 levels representing the region in the US where he/she is located, 'International', or 'Not Specified'. <br>
+•	Acct_age: The date the professional joined subtracted from 2019-02-01, the day after the data set was compiled. Units are days old. <br>
+•	Emails: Three variables corresponding to the number of emails of each category that a professional has received: <br>
+ &emsp; - email_notification_immediate <br>
+ &emsp; - email_notification_daily <br>
+ &emsp; - email_notification_weekly  <br>
+•	Tags followed: The number of tags the professional has opted to follow. <br>
+
+In order to define "participation", we've chosen 4 separate metrics, which will present as 4 different target variables to predict. We've chosen two features that represent the professional's quantity of participation, and two that approximate some measure of quality:
+
+**Target variables:**
+•	Total answers given (quantity) <br>
+•	Total words written (quantity) <br>
+•	Total number of "hearts" or upvotes a professional's answers have received (quality) <br>
+•	Total number of comments made on a professional's answers (quality, i.e. community engagement) <br>
+
+
+#### Subsetting the data
+```{r message=FALSE}
+# Select the variables outlined above
+profs <- professionals[,c(6,12,13,14,15,16,8,17,18,19)]
+profs <- profs[,c(1,3,4,5,6,8,7,2,9,10)] # Rearrange columns. Hereafter, columns 1:6 are predictors, 7:10 are targets
+# Create column index sets for each target, to simplify the code later on
+tot_ans <- 1:7
+tot_words <- c(c(1:6),8)
+tot_hearts <- c(c(1:6),9)
+tot_com <- c(c(1:6),10)
+IVs <- 1:6
+
+# Create a train index for a random 70% of the data
+set.seed(161)
+train <- sample(dim(profs)[1], 0.7*dim(profs)[1])
+```
+<br>
+
+#### Pre-modeling Checks
+
+Before moving forward with the predictive models, we'll want to double check some properties of the data, namely:
+
+- Skewness of distributions
+- Outliers
+- Multicollinearity amongst predictors
+(- Missing data was already dealt with during preprocessing)
+
+```{r fig.height = 10, fig.width = 18}
+library(GGally)
+
+# Plot correlation heatmap
+ggcorr(profs)
+
+# Pairwise scatterplot and distributions
+ggpairs(profs,
+        aes(alpha=0.3),
+        progress=FALSE)
+```
+*Skewness*
+The distributions of the 4 target variables all show a heavy positive skew, which recommends transforming them prior to modeling. The predictors are also all heavily skewed, and so we may want to try a binned model, where all variables are binned, including the targets. 
+
+*Outliers*
+The correlations between the predictors and the targets seem very minute and difficult to detect, which does not suggest the model will explain much of the variance in participation. However, the 5-7 points with very high participation seem to be masking most of the distributions and any trends. Looking at the values in the data does not uncover any clear errors, so it appears these are simply highly active participants. That said, they appear as a group in almost all of the plots, and it is reasonable to postulate that whatever factors are motivating them to participate to such an extreme level are unlikely to be shared (or even shareable) by the vast majority of the population. Therefore, it may be prudent to impose some constraints on our model by reducing the range over which it functions in order to better model participation for the vast majority of the population. We will therefore remove as "outliers" any professionals with the following characteristics, and reobserve the distributions: <br>
+
+- Professionals with total_answers >= 300 will be considered "super-users" and excluded from our model.
+
+```{r fig.height = 10, fig.width = 18}
+# Remove "super-users" and re-visualize distributions
+profs <- profs[profs$total_answers < 300,]
+
+# Recreate the train index after dropping records
+set.seed(161)
+train <- sample(dim(profs)[1], 0.7*dim(profs)[1])
+
+# Visualize
+ggpairs(profs,
+        aes(alpha=0.3), 
+        progress=FALSE)
+```
+The plots become easier to see, but there still appears to be little correlation between the predictors and the targets.
+
+Next, we calculate VIFs to check for multi-collinearity in the predictor set.
+
+```{r message=FALSE}
+# Calculate Variance Inflation Factors for the predictor variables
+library(car)
+
+vif(glm(formula=total_answers~., data=profs[train, tot_ans]))
+```
+The VIFs of all predictors are all very low, indicating no multi-collinearity concerns.  
+<br>
+
+#### Model Baselines
+
+Now that we've confirmed the absence of multi-collinearity and dealt with outliers, we'll establish a baseline model for each target variable with no transformations.
+```{r}
+# Fit baseline models
+lm.1a <- lm(formula=total_answers~., data=profs[train, tot_ans])
+summary(lm.1a)
+
+lm.2a <- lm(formula=tot_words_written~., data=profs[train, tot_words])
+summary(lm.2a)
+
+lm.3a <- lm(formula=total_hearts~., data=profs[train, tot_hearts])
+summary(lm.3a)
+
+lm.4a <- lm(formula=total_comments~., data=profs[train, tot_com])
+summary(lm.4a)
+```
+
+```{r message=FALSE}
+# Predict on validation data
+library(MLmetrics)
+pred.1a <- predict(lm.1a, newdata=profs[-train, IVs])
+pred.2a <- predict(lm.2a, newdata=profs[-train, IVs])
+pred.3a <- predict(lm.3a, newdata=profs[-train, IVs])
+pred.4a <- predict(lm.4a, newdata=profs[-train, IVs])
+
+# Compute error rates
+mape.1a <- MAPE(profs[-train, 7], pred.1a)
+mape.2a <- MAPE(profs[-train, 8], pred.2a)
+mape.3a <- MAPE(profs[-train, 9], pred.3a)
+mape.4a <- MAPE(profs[-train, 10], pred.4a)
+```
+
+Target Var    | MAPE
+------------- | -------------
+Total Answers | `r mape.1a`
+Total Words   | `r mape.2a`
+Total Hearts  | `r mape.3a`
+Total Comments| `r mape.4a`
+
+**All the errors are enormous--well over 100%--indicating that all baseline models are essentially worthless for predicting participation.**
+```{r}
+# Plot residuals
+par(mfrow = c(2, 2))
+plot(lm.1a)
+plot(lm.2a)
+plot(lm.3a)
+plot(lm.4a)
+```
+
+**The Q-Q plot clearly shows that we need to transform at least the target variable. The residuals are also highly positively biased, which is to be expected when many values are 0 and negative predictions are not an option. Centering the variables may better display the model's fit.**
+<br>
+
+#### Models with all variables log-transformed, centered, and scaled
+```{r message=FALSE, fig.height = 10, fig.width = 18 }
+# Transform, center, & scale the data
+cprofs <- profs
+cprofs[2:10] <- log(1+cprofs[2:10])
+cprofs[2:10] <- scale(cprofs[2:10])
+
+# Pairwise scatterplot and distributions
+ggpairs(cprofs,
+        aes(alpha=0.3),
+        progress=FALSE)
+```
+
+```{r}
+# Fit models with all variables transformed, centered, and scaled
+lm.1b <- lm(formula=total_answers~., data=cprofs[train, tot_ans])
+summary(lm.1b)
+
+lm.2b <- lm(formula=tot_words_written~., data=cprofs[train, tot_words])
+summary(lm.2b)
+
+lm.3b <- lm(formula=total_hearts~., data=cprofs[train, tot_hearts])
+summary(lm.3b)
+
+lm.4b <- lm(formula=total_comments~., data=cprofs[train, tot_com])
+summary(lm.4b)
+```
+
+```{r}
+# Predict on validation data
+pred.1b <- predict(lm.1b, newdata=profs[-train, IVs])
+pred.2b <- predict(lm.2b, newdata=profs[-train, IVs])
+pred.3b <- predict(lm.3b, newdata=profs[-train, IVs])
+pred.4b <- predict(lm.4b, newdata=profs[-train, IVs])
+
+# Compute error rates
+mape.1b <- MAPE(profs[-train, 7], pred.1b)
+mape.2b <- MAPE(profs[-train, 8], pred.2b)
+mape.3b <- MAPE(profs[-train, 9], pred.3b)
+mape.4b <- MAPE(profs[-train, 10], pred.4b)
+```
+
+Target Var    | Model b MAPE  | Baseline MAPE
+------------- | ------------- | ------------- 
+Total Answers | `r mape.1b`   |  `r mape.1a`
+Total Words   | `r mape.2b`   |  `r mape.2a`
+Total Hearts  | `r mape.3b`   |  `r mape.3a`
+Total Comments| `r mape.4b`   |  `r mape.4a`
+
+**The Errors show massive improvement over the baseline model, although they are still enormous.**
+
+```{r}
+# Plot residuals
+par(mfrow = c(2, 2))
+plot(lm.1b)
+plot(lm.2b)
+plot(lm.3b)
+plot(lm.4b)
+```
+
+**The residual and Q-Q plots look much better as well. Interestingly, the residual plots for 3 of the 4 models seem to show a quadratic trend, with smaller residuals for both small and large fitted values, and larger error in the mid-range. This could indicate that a polynomial regression may yield a better fit.**
+
+#### Proportional Odds Logistic Regression with binned variables
+
+Now we'll try binning instead of log transformation. 
+```{r include=FALSE} 
+bprofs <- profs #B for binned
+
+## professionals account age
+
+# set up cut-off values 
+breaks <- c(0,50,1000,1500,30000)
+# Specify interval/bin labels
+bins <- c("<500","[500-1000)", "[1000-1.5k)", ">1.5k")
+# Cut values into bins
+bprofs$professionals_acct_age <- cut(bprofs$professionals_acct_age, 
+                                     breaks=breaks, 
+                                     include.lowest=TRUE,
+                                     right = FALSE,
+                                     labels=bins)
+bprofs$professionals_acct_age <- ordered(bprofs$professionals_acct_age, levels=bins)
+
+## email notification daily
+breaks <- c(0,1,60,180,50000)
+bins <- c("None","<2mo", "2-6mo", "6mo+")
+bprofs$email_notification_daily <- cut(bprofs$email_notification_daily, breaks=breaks, include.lowest=TRUE, right=FALSE, labels=bins)
+bprofs$email_notification_daily <- ordered(bprofs$email_notification_daily, levels=bins)
+
+## email notification immediate
+breaks <- c(0,1,10,10000)
+bins <- c("None","<10", "10+")
+bprofs$email_notification_immediate <- cut(bprofs$email_notification_immediate, breaks=breaks, include.lowest=TRUE, right=FALSE, labels=bins)
+bprofs$email_notification_immediate <- ordered(bprofs$email_notification_immediate, levels=bins)
+
+## email notification weekly
+bprofs$email_notification_weekly <- ifelse(bprofs$email_notification_weekly >= 1, 1, 0)
+bprofs$email_notification_weekly <- ordered(bprofs$email_notification_weekly)
+
+## tags followed
+breaks <- c(0,1,4,10,10000)
+bins <- c("None","[1-3]","[4-9]", "10+")
+bprofs$tags_followed <- cut(bprofs$tags_followed, breaks=breaks, include.lowest=TRUE, right=FALSE, labels=bins)
+bprofs$tags_followed <- ordered(bprofs$tags_followed, levels=bins)
+
+## total answers
+breaks <- c(0,1,6,10000)
+bins <- c("None","[1-5]","5+")
+bprofs$total_answers <- cut(bprofs$total_answers, breaks=breaks, include.lowest=TRUE, right=FALSE, labels=bins)
+bprofs$total_answers <- ordered(bprofs$total_answers, levels=bins)
+
+## total words written
+breaks <- c(0,1,60,120,240,720,600000)
+bins <- c("None","<60","<120","<240","<720","720+")
+bprofs$tot_words_written <- cut(bprofs$tot_words_written, breaks=breaks, include.lowest=TRUE, right=FALSE, labels=bins)
+bprofs$tot_words_written <- ordered(bprofs$tot_words_written, levels=bins)
+
+## total hearts
+breaks <- c(0,1,3,7,10000)
+bins <- c("None","1or2","[3-6]","7+")
+bprofs$total_hearts <- cut(bprofs$total_hearts, breaks=breaks, include.lowest=TRUE, right=FALSE, labels=bins)
+bprofs$total_hearts <- ordered(bprofs$total_hearts, levels=bins)
+
+## total comments
+breaks <- c(0,1,3,7,10000)
+bins <- c("None","1or2","[3-6]","7+")
+bprofs$total_comments <- cut(bprofs$total_comments, breaks=breaks, include.lowest=TRUE, right=FALSE, labels=bins)
+bprofs$total_comments <- ordered(bprofs$total_comments, levels=bins)
+```
+
+```{r}
+# Fit proportional odds logistic regression models for ordinal target variable
+library(MASS)
+
+polr.1a <- polr(formula=total_answers~., data=bprofs[train, tot_ans])
+summary(polr.1a)
+
+polr.2a <- polr(formula=tot_words_written~., data=bprofs[train, tot_words])
+summary(polr.2a)
+
+polr.3a <- polr(formula=total_hearts~., data=bprofs[train, tot_hearts])
+summary(polr.3a)
+
+polr.4a <- polr(formula=total_comments~., data=bprofs[train, tot_com])
+summary(polr.4a)
+```
+
+```{r message=FALSE}
+# Predict on validation data
+library(MLmetrics)
+library(caret)
+polr.pred.1a <- predict(polr.1a, newdata=bprofs[-train, IVs], type='class')
+polr.pred.2a <- predict(polr.2a, newdata=bprofs[-train, IVs], type='class')
+polr.pred.3a <- predict(polr.3a, newdata=bprofs[-train, IVs], type='class')
+polr.pred.4a <- predict(polr.4a, newdata=bprofs[-train, IVs], type='class')
+polr.prob.1a <- predict(polr.1a, newdata=bprofs[-train, IVs], type='prob')
+polr.prob.2a <- predict(polr.2a, newdata=bprofs[-train, IVs], type='prob')
+polr.prob.3a <- predict(polr.3a, newdata=bprofs[-train, IVs], type='prob')
+polr.prob.4a <- predict(polr.4a, newdata=bprofs[-train, IVs], type='prob')
+
+# Criterion 1: Confusion matrix
+confusionMatrix(polr.pred.1a, bprofs[-train, 7])
+confusionMatrix(polr.pred.2a, bprofs[-train, 8])
+confusionMatrix(polr.pred.3a, bprofs[-train, 9])
+confusionMatrix(polr.pred.4a, bprofs[-train, 10])
+```
+
+**All the accuracy rates are too close to the No-Information Rate, as the p-values reflect. However, looking at the misclassification rates, it seems likely the models are suffering from the minority classes being significantly underrepresented in the training data. Therefore, we may want to try oversampling the minority classes to improve the fit.**
+
+#### Results for Professionals
+
+The best models for professionals' participation are total_answers, model lm.1b, for participation quantity, and total_comments, model lm.4b, for participation quality. Both models achieve a mean absolute percentage error of approximately 97%, and adjusted R-squared values of 0.1275 and 0.1344 respectively. Both models show significance for all email categories, tags_followed, and the international and mountain location categories. 
+<br>
+<br>
+
+
+### For Students
+The data for students is limited, but we were able to compute four predictor variables as follows:
+
+**Predictor variables:**
+•	Loc_div: factor with 11 levels representing the region in the US where he/she is located, 'International', or 'Not Specified'. <br>
+•	Acct_age: The date the student joined subtracted from 2019-02-01, the day after the data set was compiled. Units are days old. <br>
+•	Tags followed: The number of tags the professional has opted to follow. <br>
+•	School member: School membership where 0 = not a member, 1 = a member of 1 school, and 2 =  a member of more than one school. <br>
+
+In order to define "participation", we can use the analogs to the targets for professionals:
+
+**Target variables:**
+•	Total questions asked (quantity) <br>
+•	Total words written (quantity) <br>
+•	Total number of "hearts" or upvotes a student's questions have received (quality) <br>
+•	Total number of comments made on a student's questions (quality, i.e. community engagement) <br>
+
+
+#### Subsetting the data
+```{r message=FALSE}
+# Select the variables outlined above
+studs <- students[,c(4,6,7,8,9,10,11,12)] #Hereafter, columns 1:4 are predictors, 4:8 are targets
+# Create column index sets for each target, to simplify the code later on
+tot_ques <- 1:5
+tot_words <- c(c(1:4),6)
+tot_hearts <- c(c(1:4),7)
+tot_com <- c(c(1:4),8)
+IVs <- 1:4
+
+# Create a train index for a random 70% of the data
+set.seed(161)
+train <- sample(dim(studs)[1], 0.7*dim(studs)[1])
+```
+<br>
+
+#### Pre-modeling Checks
+
+Before moving forward with the predictive models, we'll want to double check some properties of the data, namely:
+
+- Skewness of distributions
+- Outliers
+- Multicollinearity amongst predictors
+(- Missing data was already dealt with during preprocessing)
+
+```{r message=FALSE, fig.height = 10, fig.width = 18}
+library(GGally)
+
+# Plot correlation heatmap
+ggcorr(studs)
+
+# Pairwise scatterplot and distributions
+ggpairs(studs,
+        aes(alpha=0.3, color=as.factor(school_mem_status)),
+        progress=FALSE)
+```
+
+*Skewness*
+ The distributions of the two continuous variables are also positively skewed and may benefit from transformation.
+
+*Outliers*
+ Students with tot_words_written >= 2000 & total_questions >= 60 will be considered "super-users" and excluded from our model.
+
+
+```{r}
+# Remove "super-users" and re-visualize distributions
+studs <- studs[(studs$tot_words_written < 2000 & studs$total_questions < 60),]
+
+# Recreate the train index after dropping records
+set.seed(161)
+train <- sample(dim(studs)[1], 0.7*dim(studs)[1])
+```
+
+
+#### Models with all variables log-transformed, centered, and scaled
+
+```{r message=FALSE, fig.height = 10, fig.width = 18 }
+# Transform, center, & scale the data
+cstuds <- studs
+cstuds[c(2,3,5,6,7,8)] <- log(1+cstuds[c(2,3,5,6,7,8)])
+cstuds[c(2,3,5,6,7,8)] <- scale(cstuds[c(2,3,5,6,7,8)])
+
+# Pairwise scatterplot and distributions
+ggpairs(cstuds,
+        aes(alpha=0.3, color=as.factor(school_mem_status)),
+        progress=FALSE)
+```
+
+```{r}
+# Fit models with all variables transformed, centered, and scaled
+lm.1c <- lm(formula=total_questions~., data=cstuds[train, tot_ques])
+summary(lm.1c)
+
+lm.2c <- lm(formula=tot_words_written~., data=cstuds[train, tot_words])
+summary(lm.2c)
+
+lm.3c <- lm(formula=total_hearts~., data=cstuds[train, tot_hearts])
+summary(lm.3c)
+
+lm.4c <- lm(formula=total_comments~., data=cstuds[train, tot_com])
+summary(lm.4c)
+```
+
+```{r message=FALSE}
+# Predict on validation data
+library(MLmetrics)
+pred.1c <- predict(lm.1c, newdata=studs[-train, IVs])
+pred.2c <- predict(lm.2c, newdata=studs[-train, IVs])
+pred.3c <- predict(lm.3c, newdata=studs[-train, IVs])
+pred.4c <- predict(lm.4c, newdata=studs[-train, IVs])
+
+# Compute error rates
+mape.1c <- MAPE(studs[-train, 5], pred.1c)
+mape.2c <- MAPE(studs[-train, 6], pred.2c)
+mape.3c <- MAPE(studs[-train, 7], pred.3c)
+mape.4c <- MAPE(studs[-train, 8], pred.4c)
+```
+
+Target Var      |  Model c MAPE 
+-------------   |  -------------
+Total Questions |  `r mape.1c` 
+Total Words     |  `r mape.2c` 
+Total Hearts    |  `r mape.3c` 
+Total Comments  |  `r mape.4c` 
+
+**The errors are as extremely poor as for the professionals, all over 100%. The R-squared values for the student models are 4 points higher, with an average around 0.17 versus 0.13**
+
+#### Results for Students
+
+The best models for students' participation are also questions and comments models, with a mean absolute percentage error of approximately 103%, and adjusted R-squared values of 0.1774 and 0.1763 respectively. Both models show significance for all email predictors, except for about half of the location categories. This may indicate that student's location plays a more important role in participation than for professionals.
+<br>
+<br>
+
+
+
+## Objective 5. Factors influencing a questions' likelihood to be answered
+This questions is asked and answered separately for professionals and for students, as the populations are inherently different, and the set of potential predictor variables and target variables is different for the two groups. We'll thus approach them sequentially.
+<br>
+
+### Data Preparation for Modeling
+```{r}
+# Subset variable set from questions data frame
+quests <- questions[,c(6:12,13)]
+quests$topic_lda <- as.factor(quests$topic_lda)
+# Create a train index for a random 70% of the data
+set.seed(161)
+train <- sample(dim(quests)[1], 0.7*dim(quests)[1])
+```
+
+```{r message=FALSE}
+# Because only 793 questions out of 23716 are unanswered, 
+# we'll need to convert factors to dummy columns to allow for oversampling by KNN
+dquests <- fastDummies::dummy_cols(quests)[,c(1,2,3,6,9:31,8)]
+
+# Remove spaces and '-' from column names (ROSE pkg doesn't like those characters)
+names(dquests)<-gsub("\\s","_",names(dquests))
+names(dquests)<-gsub("-","_",names(dquests))
+
+# Store train and test sets to allow for oversampling only on training set
+q.train <- dquests[train,]
+q.test <- dquests[-train,]
+
+# Scale the test set numeric variables (applied to train after oversampling)
+# And convert factors
+q.test[1:4] <- scale(q.test[1:4])
+q.test[5:28] <- lapply(q.test[5:28], as.factor)
+```
+
+```{r}
+str(q.train)
+table(q.train$answered)
+```
+
+```{r}
+# Oversample the minority class with ROSE
+library(ROSE)
+
+q.train <- ovun.sample(answered ~ ., 
+                       data = q.train, 
+                       method = "over", 
+                       N = 32052)$data
+
+# Convert factor variables back to factors
+q.train[5:28] <- lapply(q.train[5:28], as.factor)
+
+# Scale the numeric columns
+q.train[1:4] <- scale(q.train[1:4])
+str(q.train)
+table(q.train$answered)
+```
+**The two classes are now split 50% unanswered to 50% answered.**
+
+
+### Logistic Regression
+```{r}
+# Logistic Regression leaving out reference categories as:
+ # students_loc_div_Not_Specified
+ # school_mem_status_0
+ # topic_lda_1
+glm.1 <- glm(answered ~ .,
+             data=q.train[,c(1:10,12:15,17,18,20:28)],
+             family='binomial',
+             na.action=na.pass)
+summary(glm.1)
+```
+
+```{r message = FALSE}
+# Predict on Validation Data
+library(pROC)
+library(caret)
+glm.1.prob <- predict(glm.1, newdata=q.test[,c(1:10,12:15,17,18,20:27)], type='response')
+glm.1.pred <- as.factor(ifelse(glm.1.prob >= 0.5, 1, 0))
+
+# Evaluation Criterion 1: Confusion matrix
+confusionMatrix(glm.1.pred, q.test$answered)
+
+# Evaluation Criterion 2: ROC & AUC
+glm.1.ROC <- roc(predictor=glm.1.prob,
+                 response=q.test$answered,
+                 levels=levels(q.test$answered))
+plot(glm.1.ROC)
+
+glm.1.ROC$auc
+```
+
+### Random Forest Classifier
+```{r}
+library(randomForest)
+set.seed(161)
+
+# Fit the RF model with m set to default sqrt(p)
+rfc <- randomForest(answered ~ ., 
+                    data=q.train[,c(1:10,12:15,17,18,20:28)],
+                    ntree=1000,
+                    importance=TRUE)
+rfc
+```
+
+```{r}
+# Predict on the test data
+rfc.pred <- predict(rfc,
+                    newdata=q.test[,c(1:10,12:15,17,18,20:27)],
+                    type='class')
+
+rfc.probs <- predict(rfc,
+                     newdata=q.test[,c(1:10,12:15,17,18,20:27)], 
+                     type='prob')
+
+# Evaluation model performance using the validation data set
+
+# Criterion 1: Confusion matrix
+confusionMatrix(rfc.pred, q.test$answered)
+
+# Criterion 2: ROC curve and the area under the curve
+rfc.ROC <- roc(predictor=rfc.probs[,2],
+               response=q.test$answered,
+               levels=levels(q.test$answered))
+rfc.ROC$auc
+```
+
+```{r}
+set.seed(161)
+
+# Try RF model again with m set to 6 instead of default 4
+rfc.2 <- randomForest(answered ~ ., 
+                    data=q.train[,c(1:10,12:15,17,18,20:28)],
+                    ntree=1000,
+                    mtry=6,
+                    importance=TRUE)
+rfc.2
+
+# Predict on the test data
+rfc.2.pred <- predict(rfc.2,
+                    newdata=q.test[,c(1:10,12:15,17,18,20:27)],
+                    type='class')
+
+rfc.2.probs <- predict(rfc.2,
+                     newdata=q.test[,c(1:10,12:15,17,18,20:27)], 
+                     type='prob')
+
+# Evaluation model performance using the validation data set
+
+# Criterion 1: Confusion matrix
+confusionMatrix(rfc.2.pred, q.test$answered)
+
+# Criterion 2: ROC curve and the area under the curve
+rfc.2.ROC <- roc(predictor=rfc.2.probs[,2],
+               response=q.test$answered,
+               levels=levels(q.test$answered))
+rfc.2.ROC$auc
+```
+
+**The increase in the value for m made a substantial improvement in accuracy, but still not enough to break the no-information rate, and the AUC decreased slightly.**
+
+```{r}
+set.seed(161)
+
+# Try RF model again with m set to default, but more trees
+rfc.3 <- randomForest(answered ~ ., 
+                    data=q.train[,c(1:10,12:15,17,18,20:28)],
+                    ntree=2000,
+                    importance=TRUE)
+rfc.3
+
+# Predict on the test data
+rfc.3.pred <- predict(rfc.3,
+                    newdata=q.test[,c(1:10,12:15,17,18,20:27)],
+                    type='class')
+
+rfc.3.probs <- predict(rfc.3,
+                     newdata=q.test[,c(1:10,12:15,17,18,20:27)], 
+                     type='prob')
+
+# Evaluation model performance using the validation data set
+
+# Criterion 1: Confusion matrix
+confusionMatrix(rfc.3.pred, q.test$answered)
+
+# Criterion 2: ROC curve and the area under the curve
+rfc.3.ROC <- roc(predictor=rfc.3.probs[,2],
+               response=q.test$answered,
+               levels=levels(q.test$answered))
+rfc.3.ROC$auc
+```
+
+**Even with a higher value of m and more or less trees, the RF model is unable to predict in excess of the no-information rate. However, we can still view its predictors' importance levels.**
+
+```{r}
+varImpPlot(rfc)
+```
+
+**With so many features of low importance, we can try re-running the model without the low-importance features and see if that improves the fit.**
+
+```{r}
+set.seed(161)
+
+# Try RF model again with m set to sqrt(p), so far the model with the highest AUC
+rfc.4 <- randomForest(answered ~ ., 
+                    data=q.train[,c(1:4,28)],
+                    ntree=1000,
+                    mtry=2,
+                    importance=TRUE)
+rfc.4
+
+# Predict on the test data
+rfc.4.pred <- predict(rfc.4,
+                    newdata=q.test[,c(1:4)],
+                    type='class')
+
+rfc.4.probs <- predict(rfc.4,
+                     newdata=q.test[,c(1:4)], 
+                     type='prob')
+
+# Evaluation model performance using the validation data set
+
+# Criterion 1: Confusion matrix
+confusionMatrix(rfc.4.pred, q.test$answered)
+
+# Criterion 2: ROC curve and the area under the curve
+rfc.4.ROC <- roc(predictor=rfc.4.probs[,2],
+               response=q.test$answered,
+               levels=levels(q.test$answered))
+rfc.4.ROC$auc
+rfc.4$importance
+```
+
+**The reduction in feature set did not improve the model's performance.**
+  
+  
+## Conclusions.
+
+Both classification models were unable to exceed the no-information rate, and are thus useless for predicting the target of whether or not a question is answered or not. However, the importance estimates from the random forest model do align with the statistical significance of the predictors in the logistic regression. The random forest importance scores show that the 4 continuous variables, are more than an order of magnitude more important to the classification than the student's location, school membership, or the topical category of the question. The logistic regression seems to indicate a similar trend, with the smallest p-values for those 4 predictors, and only four topics showing statistical significance. 

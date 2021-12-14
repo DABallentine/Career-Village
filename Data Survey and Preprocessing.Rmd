@@ -1,9 +1,10 @@
 ---
 title: "Career Village - Matching Users with Professionals"
-subtitle: Data Survey and Preprocessing
+subtitle: 'Data Survey and Preprocessing'
 output:
   github_document: default
   html_notebook: default
+keep_md: true
 ---
 ## Notebook Summary 
 This notebook is our initial look at the data to identify what we have to work with, what issues exist with the data in its current form, and how the data can best be aggregated for this project. After reading in the data, we follow the outline below: <br>
@@ -12,7 +13,7 @@ This notebook is our initial look at the data to identify what we have to work w
 - Aggregate required feature sets <br>
 
 _____________________________________________
-
+  
 ## 1. Read in the Data
 ```{r}
 # Locate and list files in the directory
@@ -25,7 +26,7 @@ for (i in 1:length(file_list)) {
   assign(filenames[i], df)
 }
 ```
-
+  
 ## 2a. Variable summaries
 ```{r}
 for (i in 1:length(filenames)) {
@@ -34,7 +35,7 @@ for (i in 1:length(filenames)) {
   cat('_______________________________________________________________________________________', "\n")
 }
 ```
-
+  
 ## 2b. Count of NA values
 ```{r}
 for (i in 1:length(filenames)) {
@@ -47,7 +48,7 @@ for (i in 1:length(filenames)) {
 With no reasonable way to impute professionals' or students' missing information, we will include the value "Not specified" in order to keep those records and potentially discover trends that relate meaningfully to users who chose not to enter those fields. Since the location field is a combination of city and state or country which we will not use in its current form, we will impute the "Not Specified" value into newly engineered columns for US division.
 
 We will simply drop the one tag with no name, and 1 answer with no body. Further actions on missing values will be addressed as they arise later when certain tables are merged.
-
+  
 ## 2c. Variable structures
 ```{r}
 for (i in 1:length(filenames)) {
@@ -56,8 +57,8 @@ for (i in 1:length(filenames)) {
   cat('_______________________________________________________________________________________', "\n")
 }
 ```
-
-### 2d. Heads of each table
+  
+## 2d. Heads of each table
 ```{r}
 for (i in 1:length(filenames)) {
   cat(filenames[i], "\n", "\n")
@@ -65,91 +66,71 @@ for (i in 1:length(filenames)) {
   cat('_______________________________________________________________________________________', "\n")
 }
 ```
-
-## 3. Missing Values, Transformations, and Feature Engineering
-
-### answers
-```{r}
-
-```
-
-### comments
-```{r}
-
-```
-
-### emails
-```{r}
-
-```
-
-### group_memberships
-```{r}
-
-```
-
-### groups
-```{r}
-
-```
-
-### matches
-```{r}
-
-```
-
+  
+  
+  
+## 3. Missing Values, Transformations, Feature Engineering, and Aggregation
+  
 ### professionals
-The script sourced below completes the following actions: <br>
-* Creates variable professionals_loc_div by binning professionals location into U.S. Geographic Division <br>
-* Creates variable professionals_country by binning professionals location into country <br>
-* Transforms professionals_date_joined into datetime, and removes hh:mm:ss <br>
-* Imputes "Not Specified" for NA fields <br>
-```{r}
+The scripts sourced below complete the following actions: <br>
+* Create variable professionals_loc_div by binning professionals location into U.S. Geographic Division <br>
+* Create variable professionals_country by binning professionals location into country <br>
+* Transform professionals_date_joined into datetime, and remove hh:mm:ss <br>
+* Compute account age by subtracting from 2019-02-01, the day after data was collected  
+* Impute "Not Specified" for NA fields  
+* Standardize industry names  
+* Compute total answers submitted  
+* Compute average word count, average sentence count, and average sentence length for submitted answers, and total words written  
+* Compute number of emails of each type received (immediate, daily, and weekly)  
+* Compute number of tags followed  
+* Compute number of hearts received  
+* Compute total number of comments received  
+```{r message=FALSE}
 source("~/GitHub/Career-Village/Feature Engineering Scripts/pros_loc_div.R")
 source("~/GitHub/Career-Village/Feature Engineering Scripts/answers_by_industry.R")
+source("~/GitHub/Career-Village/Feature Engineering Scripts/pros__age_headline_emails.R")
 ```
-
-### questions
-```{r}
-
-```
-
-### school_memberships
-```{r}
-
-```
-
+  
 ### students
-The script sourced below completes the following actions: <br>
-* Creates variable students_loc_div by binning student location into U.S. Geographic Division <br>
-* Creates variable students_country by binning student location into country <br>
-* Transforms students_date_joined into datetime, and removes hh:mm:ss <br>
-* Imputes "Not Specified" for NA fields <br>
-```{r}
+The scripts sourced below complete the following actions: <br>
+* Create variable students_loc_div by binning student location into U.S. Geographic Division <br>
+* Create variable students_country by binning student location into country <br>
+* Transform students_date_joined into datetime, and remove hh:mm:ss <br>
+* Compute account age by subtracting from 2019-02-01, the day after data was collected
+* Imputed "Not Specified" for NA fields
+* Compute total questions submitted
+* Compute total words written
+* Compute school membership status (0/1 for N/Y, and 2 for more than 1 school)
+* Compute number of tags followed
+* Compute number of hearts received
+* Compute total number of comments received
+```{r message=FALSE}
 source("~/GitHub/Career-Village/Feature Engineering Scripts/stud_loc_div.R")
+source("~/GitHub/Career-Village/Feature Engineering Scripts/studs__age_tags_school.R")
 ```
-
-### tag_questions
+  
+### questions
+The scripts sourced below complete the following actions: <br>
+* Compute question age by subtracting from 2019-02-01, the day after data was collected
+* Compute the number of tags associated with each question
+* Compute the word count of each question
+* Compute the number of emails sent out regarding each question
+* Add school_mem_status and students_loc_div from the student who submitted the question
+* Derive 9 topical categories through Latent Dirichlet Allocation, and include the topic assignments 
+```{r message=FALSE}
+source("~/GitHub/Career-Village/questions_text_analysis.R")
+source("~/GitHub/Career-Village/Feature Engineering Scripts/quests__tags_words_emails_topics.R")
+```
+  
+  
+  
+## Output after preprocessing
 ```{r}
-
+engineered <- c("professionals", "students", "questions")
+for (i in 1:length(engineered)) {
+  cat(engineered[i], "\n", "\n")
+  print(str(get(as.name(engineered[i]))))
+  cat('_______________________________________________________________________________________', "\n", "\n")
+}
 ```
 
-### tag_users
-```{r}
-
-```
-
-### tags
-```{r}
-
-```
-
-### question_scores
-```{r}
-
-```
-
-### answer_scores
-```{r}
-
-```
